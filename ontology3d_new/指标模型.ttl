@@ -1,0 +1,356 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix 金融: <http://finance-ontology.org/zh#> .
+
+#=====================================
+# 一、原有全部元数据类 完整保留
+#=====================================
+# 度量体系
+金融:度量 a owl:Class .
+金融:笔数 a owl:Class ; rdfs:subClassOf 金融:度量 .
+金融:余额 a owl:Class ; rdfs:subClassOf 金融:度量 .
+
+# 维度体系
+金融:维度 a owl:Class .
+金融:客户类型 a owl:Class ; rdfs:subClassOf 金融:维度 .
+金融:对公客户类型 a owl:Class ; rdfs:subClassOf 金融:客户类型 .
+金融:对私客户类型 a owl:Class ; rdfs:subClassOf 金融:客户类型 .
+
+金融:基础产品 a owl:Class ; rdfs:subClassOf 金融:维度 .
+金融:存款产品 a owl:Class ; rdfs:subClassOf 金融:基础产品 .
+金融:贷款产品 a owl:Class ; rdfs:subClassOf 金融:基础产品 .
+金融:信用卡产品 a owl:Class ; rdfs:subClassOf 金融:基础产品 .
+
+金融:渠道类型 a owl:Class ; rdfs:subClassOf 金融:维度 .
+金融:手机银行渠道 a owl:Class ; rdfs:subClassOf 金融:渠道类型 .
+金融:网上银行渠道 a owl:Class ; rdfs:subClassOf 金融:渠道类型 .
+
+#=====================================
+# 二、原有全部指标层级体系 完整保留
+#=====================================
+金融:指标 a owl:Class .
+金融:余额类指标 a owl:Class ; rdfs:subClassOf 金融:指标 .
+金融:笔数类指标 a owl:Class ; rdfs:subClassOf 金融:指标 .
+
+# 余额细分指标
+金融:对公存款余额 a owl:Class ; rdfs:subClassOf 金融:余额类指标 .
+金融:对公贷款余额 a owl:Class ; rdfs:subClassOf 金融:余额类指标 .
+金融:对私存款余额 a owl:Class ; rdfs:subClassOf 金融:余额类指标 .
+金融:对私贷款余额 a owl:Class ; rdfs:subClassOf 金融:余额类指标 .
+
+# 笔数细分指标
+金融:对公存款笔数 a owl:Class ; rdfs:subClassOf 金融:笔数类指标 .
+金融:对公贷款笔数 a owl:Class ; rdfs:subClassOf 金融:笔数类指标 .
+金融:对私存款笔数 a owl:Class ; rdfs:subClassOf 金融:笔数类指标 .
+金融:对私贷款笔数 a owl:Class ; rdfs:subClassOf 金融:笔数类指标 .
+
+# 指标结果
+金融:指标结果 a owl:Class .
+
+#=====================================
+# 三、原有全部业务实体类 完整保留
+#=====================================
+金融:客户 a owl:Class .
+金融:对公客户 a owl:Class ; rdfs:subClassOf 金融:客户 .
+金融:对私客户 a owl:Class ; rdfs:subClassOf 金融:客户 .
+
+金融:账户 a owl:Class .
+金融:对公存款账户 a owl:Class ; rdfs:subClassOf 金融:账户 .
+金融:对公贷款账户 a owl:Class ; rdfs:subClassOf 金融:账户 .
+金融:对私存款账户 a owl:Class ; rdfs:subClassOf 金融:账户 .
+金融:对私贷款账户 a owl:Class ; rdfs:subClassOf 金融:账户 .
+
+金融:交易 a owl:Class .
+金融:对公存款交易 a owl:Class ; rdfs:subClassOf 金融:交易 .
+金融:对公贷款交易 a owl:Class ; rdfs:subClassOf 金融:交易 .
+金融:对私存款交易 a owl:Class ; rdfs:subClassOf 金融:交易 .
+金融:对私贷款交易 a owl:Class ; rdfs:subClassOf 金融:交易 .
+
+#=====================================
+# 四、原有全部基础数据属性 完整保留
+#=====================================
+金融:指标口径 a owl:DatatypeProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range xsd:string .
+金融:指标描述 a owl:DatatypeProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range xsd:string .
+金融:度量数值 a owl:DatatypeProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range xsd:decimal .
+金融:统计时点 a owl:DatatypeProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range xsd:date .
+金融:统计周期 a owl:DatatypeProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range xsd:string .
+
+#=====================================
+# 五、原有全部核心对象属性 完整保留
+#=====================================
+# 指标绑定元数据
+金融:对应度量类型 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range 金融:度量 .
+金融:限定客户维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range 金融:客户类型 .
+金融:限定产品维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range 金融:基础产品 .
+金融:限定渠道维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标 ;
+    rdfs:range 金融:渠道类型 .
+
+# 指标统计业务主体
+金融:余额类统计主体 a owl:ObjectProperty ;
+    rdfs:domain 金融:余额类指标 ;
+    rdfs:range 金融:账户 .
+金融:笔数类统计主体 a owl:ObjectProperty ;
+    rdfs:domain 金融:笔数类指标 ;
+    rdfs:range 金融:交易 .
+
+# 指标结果关联属性
+金融:归属所属指标 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:指标 .
+金融:结果采用度量 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:度量 .
+金融:结果选用客户维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:客户类型 .
+金融:结果选用产品维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:基础产品 .
+金融:结果选用渠道维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:渠道类型 .
+金融:数据来源账户 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:账户 .
+金融:数据来源交易 a owl:ObjectProperty ;
+    rdfs:domain 金融:指标结果 ;
+    rdfs:range 金融:交易 .
+
+# 业务实体绑定维度
+金融:客户归属客户类型 a owl:ObjectProperty ;
+    rdfs:domain 金融:客户 ;
+    rdfs:range 金融:客户类型 .
+金融:账户归属产品维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:账户 ;
+    rdfs:range 金融:基础产品 .
+金融:交易使用渠道维度 a owl:ObjectProperty ;
+    rdfs:domain 金融:交易 ;
+    rdfs:range 金融:渠道类型 .
+
+# 客户-账户-交易双向互逆关系
+金融:客户持有账户 a owl:ObjectProperty ;
+    owl:inverseOf 金融:账户所属客户 .
+金融:账户所属客户 a owl:ObjectProperty .
+金融:账户发生交易 a owl:ObjectProperty ;
+    owl:inverseOf 金融:交易归属账户 .
+金融:交易归属账户 a owl:ObjectProperty .
+
+#=====================================
+# 六、原有全部OWL约束规则 完整保留
+#=====================================
+# 度量约束
+金融:余额类指标 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:余额 ;
+    owl:onProperty 金融:对应度量类型
+] .
+金融:笔数类指标 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:笔数 ;
+    owl:onProperty 金融:对应度量类型
+] .
+
+# 统计主体约束
+金融:余额类指标 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:账户 ;
+    owl:onProperty 金融:余额类统计主体
+] .
+金融:笔数类指标 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:交易 ;
+    owl:onProperty 金融:笔数类统计主体
+] .
+
+# 客户维度约束
+金融:对公存款余额 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:对公客户类型 ;
+    owl:onProperty 金融:限定客户维度
+] .
+金融:对公存款笔数 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:对公客户类型 ;
+    owl:onProperty 金融:限定客户维度
+] .
+金融:对私贷款余额 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:对私客户类型 ;
+    owl:onProperty 金融:限定客户维度
+] .
+金融:对私贷款笔数 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:对私客户类型 ;
+    owl:onProperty 金融:限定客户维度
+] .
+
+# 产品维度约束
+金融:对公存款余额 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:存款产品 ;
+    owl:onProperty 金融:限定产品维度
+] .
+金融:对私存款余额 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:存款产品 ;
+    owl:onProperty 金融:限定产品维度
+] .
+金融:对公贷款余额 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:贷款产品 ;
+    owl:onProperty 金融:限定产品维度
+] .
+金融:对私贷款笔数 rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:allValuesFrom 金融:贷款产品 ;
+    owl:onProperty 金融:限定产品维度
+] .
+
+#=====================================
+# 七、原有全部指标实例 完整保留
+#=====================================
+金融:对公存款余额标准实例 a 金融:对公存款余额 ;
+    金融:对应度量类型 金融:余额 ;
+    金融:限定客户维度 金融:对公客户类型 ;
+    金融:限定产品维度 金融:存款产品 ;
+    金融:余额类统计主体 金融:对公存款账户 ;
+    金融:指标口径 "统计时点对公存款账户本金合计，剔除冻结、保证金资金"^^xsd:string ;
+    金融:指标描述 "衡量银行对公存款资金沉淀规模核心指标"^^xsd:string .
+
+金融:对私贷款笔数标准实例 a 金融:对私贷款笔数 ;
+    金融:对应度量类型 金融:笔数 ;
+    金融:限定客户维度 金融:对私客户类型 ;
+    金融:限定产品维度 金融:贷款产品 ;
+    金融:笔数类统计主体 金融:对私贷款交易 ;
+    金融:指标口径 "统计周期内有效放款对私贷款业务数量，剔除作废单据"^^xsd:string ;
+    金融:指标描述 "反映零售信贷业务拓展活跃度"^^xsd:string .
+
+金融:手机银行对公贷款余额实例 a 金融:对公贷款余额 ;
+    金融:对应度量类型 金融:余额 ;
+    金融:限定客户维度 金融:对公客户类型 ;
+    金融:限定产品维度 金融:贷款产品 ;
+    金融:限定渠道维度 金融:手机银行渠道 ;
+    金融:余额类统计主体 金融:对公贷款账户 ;
+    金融:指标口径 "仅统计手机银行渠道办理发放的对公贷款期末本金余额"^^xsd:string ;
+    金融:指标描述 "数字化对公信贷专项监测指标"^^xsd:string .
+
+#=====================================
+# 八、原有全部指标结果实例 完整保留
+#=====================================
+金融:2024三季度对公存款余额结果 a 金融:指标结果 ;
+    金融:归属所属指标 金融:对公存款余额标准实例 ;
+    金融:结果采用度量 金融:余额 ;
+    金融:结果选用客户维度 金融:对公客户类型 ;
+    金融:结果选用产品维度 金融:存款产品 ;
+    金融:数据来源账户 金融:全行对公存款账户集合 ;
+    金融:度量数值 "128600000000.00"^^xsd:decimal ;
+    金融:统计时点 "2024-09-30"^^xsd:date ;
+    金融:统计周期 "季度"^^xsd:string .
+
+金融:2024十月对私贷款笔数结果 a 金融:指标结果 ;
+    金融:归属所属指标 金融:对私贷款笔数标准实例 ;
+    金融:结果采用度量 金融:笔数 ;
+    金融:结果选用客户维度 金融:对私客户类型 ;
+    金融:结果选用产品维度 金融:贷款产品 ;
+    金融:数据来源交易 金融:当月对私贷款放款交易集合 ;
+    金融:度量数值 "1568"^^xsd:decimal ;
+    金融:统计时点 "2024-10-31"^^xsd:date ;
+    金融:统计周期 "月度"^^xsd:string .
+
+#=====================================================================
+# 九、全新新增：银行经营分析体系（纯新增内容，不改动上面任何原有内容）
+#=====================================================================
+# 9.1 新增经营主题类
+金融:经营主题 a owl:Class .
+金融:存款经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+金融:贷款经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+金融:客户经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+金融:渠道经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+金融:资产质量经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+金融:中间业务经营 a owl:Class ;rdfs:subClassOf 金融:经营主题 .
+
+# 9.2 新增经营分析场景类
+金融:经营分析场景 a owl:Class .
+金融:时点经营分析 a owl:Class ;rdfs:subClassOf 金融:经营分析场景 .
+金融:周期经营分析 a owl:Class ;rdfs:subClassOf 金融:经营分析场景 .
+金融:同比经营分析 a owl:Class ;rdfs:subClassOf 金融:经营分析场景 .
+金融:环比经营分析 a owl:Class ;rdfs:subClassOf 金融:经营分析场景 .
+金融:结构经营分析 a owl:Class ;rdfs:subClassOf 金融:经营分析场景 .
+
+# 9.3 新增经营评价维度类
+金融:经营评价维度 a owl:Class .
+金融:规模维度 a owl:Class ;rdfs:subClassOf 金融:经营评价维度 .
+金融:增速维度 a owl:Class ;rdfs:subClassOf 金融:经营评价维度 .
+金融:结构维度 a owl:Class ;rdfs:subClassOf 金融:经营评价维度 .
+金融:效益维度 a owl:Class ;rdfs:subClassOf 金融:经营评价维度 .
+金融:风险维度 a owl:Class ;rdfs:subClassOf 金融:经营评价维度 .
+
+# 9.4 新增银行经营机构层级类
+金融:经营机构 a owl:Class .
+金融:总行 a owl:Class ;rdfs:subClassOf 金融:经营机构 .
+金融:一级分行 a owl:Class ;rdfs:subClassOf 金融:经营机构 .
+金融:二级分行 a owl:Class ;rdfs:subClassOf 金融:经营机构 .
+金融:支行 a owl:Class ;rdfs:subClassOf 金融:经营机构 .
+金融:社区网点 a owl:Class ;rdfs:subClassOf 金融:经营机构 .
+
+# 9.5 新增经营管理衍生类
+金融:经营考核指标 a owl:Class .
+金融:经营分析报表 a owl:Class .
+金融:同业对标主体 a owl:Class .
+
+# 9.6 新增经营类扩展数据属性
+金融:考核目标值 a owl:DatatypeProperty ;rdfs:domain 金融:经营考核指标;rdfs:range xsd:decimal .
+金融:同比变动值 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:decimal .
+金融:环比变动值 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:decimal .
+金融:经营同比增速 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:float .
+金融:经营环比增速 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:float .
+金融:行业市场占比 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:float .
+金融:经营完成率 a owl:DatatypeProperty ;rdfs:domain 金融:指标结果;rdfs:range xsd:float .
+
+# 9.7 新增经营体系关联对象属性（打通新旧所有体系）
+# 经营主题 ↔ 基础指标
+金融:主题包含业务指标 a owl:ObjectProperty ;rdfs:domain 金融:经营主题;rdfs:range 金融:指标 .
+金融:业务指标归属经营主题 a owl:ObjectProperty ;owl:inverseOf 金融:主题包含业务指标 .
+
+# 经营机构层级关系
+金融:上级机构管辖下级机构 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:经营机构 .
+金融:下级机构隶属于上级机构 a owl:ObjectProperty ;owl:inverseOf 金融:上级机构管辖下级机构 .
+
+# 经营机构与原有业务实体关联
+金融:机构管辖客户群体 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:客户 .
+金融:机构管理各类账户 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:账户 .
+金融:机构经办各类交易 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:交易 .
+
+# 经营机构与指标结果关联
+金融:机构汇总产出指标结果 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:指标结果 .
+金融:指标结果归属统计机构 a owl:ObjectProperty ;owl:inverseOf 金融:机构汇总产出指标结果 .
+
+# 分析场景联动
+金融:经营分析依托指标结果 a owl:ObjectProperty ;rdfs:domain 金融:经营分析场景;rdfs:range 金融:指标结果 .
+金融:经营分析适配评价维度 a owl:ObjectProperty ;rdfs:domain 金融:经营分析场景;rdfs:range 金融:经营评价维度 .
+
+# 报表与考核关联
+金融:经营报表整合指标结果 a owl:ObjectProperty ;rdfs:domain 金融:经营分析报表;rdfs:range 金融:指标结果 .
+金融:考核指标对标基础业务指标 a owl:ObjectProperty ;rdfs:domain 金融:经营考核指标;rdfs:range 金融:指标 .
+
+# 经营体系联动原有维度体系
+金融:经营统计依托维度体系 a owl:ObjectProperty ;rdfs:domain 金融:经营机构;rdfs:range 金融:维度 .

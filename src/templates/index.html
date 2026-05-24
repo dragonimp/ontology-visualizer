@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDF/OWL Ontology Visualization</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c3e50 !important;
+        }
+        #network {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        .stat-box {
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        .node-info {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .sparql-editor {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            background-color: #e3f2fd;
+            border-color: #2980b9;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+            font-size: 12px;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            margin-right: 5px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-project-diagram"></i> RDF/OWL Ontology Visualizer
+            </a>
+            <div class="navbar-text">
+                <span id="current-graph">No graph loaded</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Left sidebar: Controls and Info -->
+            <div class="col-md-3">
+                <!-- File Upload Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-upload"></i> Load Ontology
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <h5>Drag & Drop RDF/OWL File</h5>
+                            <p class="text-muted">or click to browse</p>
+                            <p class="small text-muted">Supports: .ttl, .rdf, .owl, .n3, .nt, .jsonld</p>
+                            <input type="file" id="fileInput" class="d-none" accept=".ttl,.rdf,.owl,.n3,.nt,.jsonld,.json">
+                            <button class="btn btn-primary btn-sm mt-2" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </button>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Or connect to Fuseki:</h6>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control form-control-sm" id="fusekiEndpoint" 
+                                       placeholder="http://localhost:3030/ds/sparql" value="http://localhost:3030/ds/sparql">
+                                <button class="btn btn-success btn-sm" onclick="connectFuseki()">
+                                    <i class="fas fa-plug"></i> Connect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graph Statistics -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar"></i> Graph Statistics
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value" id="stat-nodes">0</div>
+                                    <div class="stat-label">Nodes</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value" id="stat-edges">0</div>
+                                    <div class="stat-label">Edges</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-box">
+                                    <div class="stat-value" id="stat-triples">0</div>
+                                    <div class="stat-label">Triples</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-key"></i> Legend
+                    </div>
+                    <div class="card-body">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #97C2FC;"></span> Resource
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #FFFF88;"></span> Blank Node
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #e1f5fe;"></span> Literal
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #FB7E81;"></span> Class
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #7BE141;"></span> Property
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Node Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i> Node Details
+                    </div>
+                    <div class="card-body node-info" id="nodeDetails">
+                        <p class="text-muted">Click on a node to see details</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Visualization Area -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-project-diagram"></i> Ontology Visualization</span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="network.fit()" title="Fit to screen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="resetView()" title="Reset view">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="exportPNG()" title="Export as PNG">
+                                    <i class="fas fa-download"></i> PNG
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="exportJSON()" title="Export as JSON">
+                                    <i class="fas fa-download"></i> JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="network"></div>
+                    </div>
+                </div>
+
+                <!-- SPARQL Query Interface -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-search"></i> SPARQL Query
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <textarea class="form-control sparql-editor" id="sparqlQuery" rows="4" 
+                                      placeholder="SELECT * WHERE { ?s ?p ?o } LIMIT 100">PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX owl: &lt;http://www.w3.org/2002/07/owl#&gt;
+
+SELECT ?subject ?predicate ?object
+WHERE {
+  ?subject ?predicate ?object
+}
+LIMIT 100</textarea>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-primary btn-sm" onclick="executeSparql()">
+                                    <i class="fas fa-play"></i> Execute Query
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="loadExampleQuery()">
+                                    <i class="fas fa-book"></i> Example
+                                </button>
+                            </div>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto" id="queryType">
+                                    <option value="SELECT">SELECT</option>
+                                    <option value="CONSTRUCT">CONSTRUCT</option>
+                                    <option value="DESCRIBE">DESCRIBE</option>
+                                    <option value="ASK">ASK</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="queryResults" class="mt-3">
+                            <!-- Query results will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right sidebar: Controls and Tools -->
+            <div class="col-md-3">
+                <!-- Visualization Controls -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h"></i> Visualization Controls
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Physics Enabled</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="physicsToggle" checked 
+                                       onchange="togglePhysics(this.checked)">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Node Size</label>
+                            <input type="range" class="form-range" min="10" max="50" value="25" 
+                                   onchange="updateNodeSize(this.value)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Edge Width</label>
+                            <input type="range" class="form-range" min="1" max="10" value="2" 
+                                   onchange="updateEdgeWidth(this.value)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Layout</label>
+                            <select class="form-select form-select-sm" onchange="changeLayout(this.value)">
+                                <option value="hierarchical">Hierarchical</option>
+                                <option value="force" selected>Force-directed</option>
+                                <option value="grid">Grid</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm w-100" onclick="clearGraph()">
+                            <i class="fas fa-trash-alt"></i> Clear Graph
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-filter"></i> Search & Filter
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-sm" id="searchInput" 
+                                   placeholder="Search nodes...">
+                            <button class="btn btn-primary btn-sm" onclick="searchNode()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Filter by Type</label>
+                            <select class="form-select form-select-sm" id="filterType" onchange="filterByType()">
+                                <option value="all">All Nodes</option>
+                                <option value="resource">Resources</option>
+                                <option value="blank">Blank Nodes</option>
+                                <option value="literal">Literals</option>
+                                <option value="class">Classes</option>
+                                <option value="property">Properties</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Highlight Connections</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="highlightConnections" 
+                                       onchange="toggleHighlight(this.checked)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Files -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i> Recent Files
+                    </div>
+                    <div class="card-body">
+                        <div id="recentFiles">
+                            <p class="text-muted small">No recent files</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">
+                RDF/OWL Ontology Visualizer | Powered by Flask, RDFlib, and vis.js |
+                <a href="https://www.w3.org/RDF/" target="_blank">RDF</a> |
+                <a href="https://www.w3.org/OWL/" target="_blank">OWL</a> |
+                <a href="https://jena.apache.org/" target="_blank">Apache Jena</a>
+            </span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    
+    <!-- Main Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

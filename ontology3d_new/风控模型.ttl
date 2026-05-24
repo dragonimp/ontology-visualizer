@@ -1,0 +1,419 @@
+@prefix : <http://example.org/finance#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://example.org/finance#> .
+
+<http://example.org/finance> rdf:type owl:Ontology ;
+                              rdfs:label "金融风控本体" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled
+<http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://example.org/finance#belongsToEnterprise
+:belongsToEnterprise rdf:type owl:ObjectProperty ;
+                     rdfs:domain :EquityOwnership ;
+                     rdfs:range :Enterprise ;
+                     rdfs:label "归属企业" .
+
+
+###  http://example.org/finance#counterParty
+:counterParty rdf:type owl:ObjectProperty ;
+              rdfs:domain :Transaction ;
+              rdfs:range :Enterprise ;
+              rdfs:label "交易对手" .
+
+
+###  http://example.org/finance#hasActualControl
+:hasActualControl rdf:type owl:ObjectProperty ,
+                           owl:TransitiveProperty ;
+                  rdfs:domain :Enterprise ;
+                  rdfs:range :Enterprise ;
+                  rdfs:label "实际控制" .
+
+
+###  http://example.org/finance#holdsEquity
+:holdsEquity rdf:type owl:ObjectProperty ;
+             rdfs:domain :Enterprise ;
+             rdfs:range :EquityOwnership ;
+             rdfs:label "持有股权" .
+
+
+###  http://example.org/finance#transactionParty
+:transactionParty rdf:type owl:ObjectProperty ;
+                  rdfs:domain :Transaction ;
+                  rdfs:range :Enterprise ;
+                  rdfs:label "交易方" .
+
+
+###  http://example.org/finance#triggersAction
+:triggersAction rdf:type owl:ObjectProperty ;
+                rdfs:domain :RiskTransaction ;
+                rdfs:range :DisposalAction ;
+                rdfs:label "触发动作" .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://example.org/finance#enterpriseName
+:enterpriseName rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Enterprise ;
+                rdfs:range xsd:string ;
+                rdfs:label "企业名称" .
+
+
+###  http://example.org/finance#ownershipRatio
+:ownershipRatio rdf:type owl:DatatypeProperty ;
+                rdfs:domain :EquityOwnership ;
+                rdfs:range xsd:decimal ;
+                rdfs:label "持有比例" .
+
+
+###  http://example.org/finance#transactionAmount
+:transactionAmount rdf:type owl:DatatypeProperty ;
+                   rdfs:domain :Transaction ;
+                   rdfs:range xsd:decimal ;
+                   rdfs:label "交易金额" .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://example.org/finance#ConnectedTransaction
+:ConnectedTransaction rdf:type owl:Class ;
+                      rdfs:subClassOf :RiskTransaction ;
+                      rdfs:label "关联交易" .
+
+
+###  http://example.org/finance#DisposalAction
+:DisposalAction rdf:type owl:Class ;
+                rdfs:label "处置动作" .
+
+
+###  http://example.org/finance#Enterprise
+:Enterprise rdf:type owl:Class ;
+            rdfs:label "企业" .
+
+
+###  http://example.org/finance#EquityOwnership
+:EquityOwnership rdf:type owl:Class ;
+                 rdfs:label "股权关系" .
+
+
+###  http://example.org/finance#FreezeAccount
+:FreezeAccount rdf:type owl:Class ;
+               rdfs:subClassOf :DisposalAction ;
+               rdfs:label "冻结账户" .
+
+
+###  http://example.org/finance#MoneyLaunderingTransaction
+:MoneyLaunderingTransaction rdf:type owl:Class ;
+                            rdfs:subClassOf :RiskTransaction ;
+                            rdfs:label "洗钱交易" .
+
+
+###  http://example.org/finance#NotifyAccountManager
+:NotifyAccountManager rdf:type owl:Class ;
+                      rdfs:subClassOf :DisposalAction ;
+                      rdfs:label "通知客户经理" .
+
+
+###  http://example.org/finance#ReportToRegulator
+:ReportToRegulator rdf:type owl:Class ;
+                   rdfs:subClassOf :DisposalAction ;
+                   rdfs:label "上报监管" .
+
+
+###  http://example.org/finance#RiskTransaction
+:RiskTransaction rdf:type owl:Class ;
+                 rdfs:subClassOf :Transaction ;
+                 rdfs:label "风险交易" .
+
+
+###  http://example.org/finance#Transaction
+:Transaction rdf:type owl:Class ;
+             rdfs:label "交易" .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://example.org/finance#Enterprise_A
+:Enterprise_A rdf:type owl:NamedIndividual ,
+                       :Enterprise ;
+              :holdsEquity :Equity_A_hold_C ;
+              rdfs:label "企业A"@zh .
+
+
+###  http://example.org/finance#Enterprise_B
+:Enterprise_B rdf:type owl:NamedIndividual ,
+                       :Enterprise ;
+              rdfs:label "企业B"@zh .
+
+
+###  http://example.org/finance#Enterprise_C
+:Enterprise_C rdf:type owl:NamedIndividual ,
+                       :Enterprise ;
+              :holdsEquity :Equity_C_hold_B ;
+              rdfs:label "企业C"@zh .
+
+
+###  http://example.org/finance#Equity_A_hold_C
+:Equity_A_hold_C rdf:type owl:NamedIndividual ,
+                          :EquityOwnership ;
+                 :belongsToEnterprise :Enterprise_C ;
+                 :ownershipRatio 0.6 ;
+                 rdfs:label "企业A持有企业C的股权"@zh .
+
+
+###  http://example.org/finance#Equity_C_hold_B
+:Equity_C_hold_B rdf:type owl:NamedIndividual ,
+                          :EquityOwnership ;
+                 :belongsToEnterprise :Enterprise_B ;
+                 :ownershipRatio 0.7 ;
+                 rdfs:label "企业C持有企业B的股权"@zh .
+
+
+###  http://example.org/finance#Transaction_A_to_B_200W
+:Transaction_A_to_B_200W rdf:type owl:NamedIndividual ,
+                                  :Transaction ;
+                         :counterParty :Enterprise_B ;
+                         :transactionParty :Enterprise_A ;
+                         :transactionAmount 2000000 ;
+                         rdfs:label "企业A向企业B转账200万"@zh .
+
+
+#################################################################
+#    Rules
+#################################################################
+
+:t rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:act rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:a rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:b rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:amt rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:e rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:o rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:f rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+:ratio rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+[ <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> "true"^^xsd:boolean ;
+   rdfs:comment "关联交易 => 通知客户经理" ;
+   rdfs:label "处置规则" ;
+   rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :ConnectedTransaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> :triggersAction ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> :act
+                                                                ] ;
+                                                      rdf:rest rdf:nil
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :NotifyAccountManager ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :act
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+[ <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> "true"^^xsd:boolean ;
+   rdfs:comment "交易双方存在实际控制（被控制方控制）" ;
+   rdfs:label "关联交易" ;
+   rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :Transaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> :transactionParty ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> :a
+                                                                ] ;
+                                                      rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                 rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                             <http://www.w3.org/2003/11/swrl#propertyPredicate> :counterParty ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument2> :b
+                                                                           ] ;
+                                                                 rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                            rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#propertyPredicate> :hasActualControl ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument1> :b ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument2> :a
+                                                                                      ] ;
+                                                                            rdf:rest rdf:nil
+                                                                          ]
+                                                               ]
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :ConnectedTransaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+[ <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> "true"^^xsd:boolean ;
+   rdfs:comment "交易金额 > 100 万" ;
+   rdfs:label "风险交易" ;
+   rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :Transaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> :transactionAmount ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> :amt
+                                                                ] ;
+                                                      rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                 rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#BuiltinAtom> ;
+                                                                             <http://www.w3.org/2003/11/swrl#builtin> <http://www.w3.org/2003/11/swrlb#greaterThan> ;
+                                                                             <http://www.w3.org/2003/11/swrl#arguments> [ rdf:type rdf:List ;
+                                                                                                                          rdf:first :amt ;
+                                                                                                                          rdf:rest [ rdf:type rdf:List ;
+                                                                                                                                     rdf:first 1000000 ;
+                                                                                                                                     rdf:rest rdf:nil
+                                                                                                                                   ]
+                                                                                                                        ]
+                                                                           ] ;
+                                                                 rdf:rest rdf:nil
+                                                               ]
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :RiskTransaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+[ <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> "true"^^xsd:boolean ;
+   rdfs:comment "持股比例 >50% => 实际控制" ;
+   rdfs:label "实际控制" ;
+   rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#propertyPredicate> :holdsEquity ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :e ;
+                                                       <http://www.w3.org/2003/11/swrl#argument2> :o
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> :belongsToEnterprise ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> :o ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> :f
+                                                                ] ;
+                                                      rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                 rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom> ;
+                                                                             <http://www.w3.org/2003/11/swrl#propertyPredicate> :ownershipRatio ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument1> :o ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument2> :ratio
+                                                                           ] ;
+                                                                 rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                            rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#BuiltinAtom> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#builtin> <http://www.w3.org/2003/11/swrlb#greaterThan> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#arguments> [ rdf:type rdf:List ;
+                                                                                                                                     rdf:first :ratio ;
+                                                                                                                                     rdf:rest [ rdf:type rdf:List ;
+                                                                                                                                                rdf:first 0.5 ;
+                                                                                                                                                rdf:rest rdf:nil
+                                                                                                                                              ]
+                                                                                                                                   ]
+                                                                                      ] ;
+                                                                            rdf:rest rdf:nil
+                                                                          ]
+                                                               ]
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#propertyPredicate> :hasActualControl ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :e ;
+                                                       <http://www.w3.org/2003/11/swrl#argument2> :f
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+[ <http://swrl.stanford.edu/ontologies/3.3/swrla.owl#isRuleEnabled> "true"^^xsd:boolean ;
+   rdfs:comment "交易双方存在实际控制（控制方控制）" ;
+   rdfs:label "关联交易2" ;
+   rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :Transaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> :transactionParty ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> :a
+                                                                ] ;
+                                                      rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                 rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                             <http://www.w3.org/2003/11/swrl#propertyPredicate> :counterParty ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument1> :t ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument2> :b
+                                                                           ] ;
+                                                                 rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                            rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#propertyPredicate> :hasActualControl ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument1> :a ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument2> :b
+                                                                                      ] ;
+                                                                            rdf:rest rdf:nil
+                                                                          ]
+                                                               ]
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> :ConnectedTransaction ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> :t
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

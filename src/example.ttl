@@ -1,0 +1,79 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Classes
+ex:Person a owl:Class ;
+    rdfs:label "Person"@en ;
+    rdfs:comment "A human being"@en .
+
+ex:Organization a owl:Class ;
+    rdfs:label "Organization"@en ;
+    rdfs:comment "A company or institution"@en .
+
+ex:Project a owl:Class ;
+    rdfs:label "Project"@en ;
+    rdfs:comment "A collaborative enterprise"@en .
+
+# Properties
+ex:worksFor a owl:ObjectProperty ;
+    rdfs:label "works for"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Organization .
+
+ex:manages a owl:ObjectProperty ;
+    rdfs:label "manages"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Project .
+
+ex:hasName a owl:DatatypeProperty ;
+    rdfs:label "has name"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:hasStartDate a owl:DatatypeProperty ;
+    rdfs:label "has start date"@en ;
+    rdfs:domain ex:Project ;
+    rdfs:range xsd:date .
+
+# Individuals
+ex:alice a ex:Person ;
+    rdfs:label "Alice"@en ;
+    ex:hasName "Alice Smith" ;
+    ex:worksFor ex:companyX .
+
+ex:bob a ex:Person ;
+    rdfs:label "Bob"@en ;
+    ex:hasName "Bob Johnson" ;
+    ex:worksFor ex:companyX ;
+    ex:manages ex:projectA .
+
+ex:companyX a ex:Organization ;
+    rdfs:label "Company X"@en ;
+    foaf:homepage <http://www.companyx.example> .
+
+ex:projectA a ex:Project ;
+    rdfs:label "Project Alpha"@en ;
+    ex:hasStartDate "2024-01-15"^^xsd:date .
+
+ex:projectB a ex:Project ;
+    rdfs:label "Project Beta"@en ;
+    ex:hasStartDate "2024-03-20"^^xsd:date .
+
+# Relationships
+ex:companyX ex:hasProject ex:projectA .
+ex:companyX ex:hasProject ex:projectB .
+
+# Subclass relationships
+ex:Employee a owl:Class ;
+    rdfs:subClassOf ex:Person ;
+    rdfs:label "Employee"@en .
+
+ex:Manager a owl:Class ;
+    rdfs:subClassOf ex:Employee ;
+    rdfs:label "Manager"@en .
+
+ex:bob a ex:Manager .

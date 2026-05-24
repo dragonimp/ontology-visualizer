@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>本体知识图谱可视化</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/n3@1.17.1/browser/n3.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #1a1a2e; color: #e0e0e0; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        #canvas-container { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
+        
+        /* 侧边栏 - 桌面端固定宽度，移动端可折叠 */
+        .sidebar {
+            position: fixed; top: 0; left: 0; width: 300px; height: 100vh;
+            background: rgba(16, 16, 36, 0.95); border-right: 1px solid #333;
+            padding: 20px; overflow-y: auto; z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-toggle {
+            display: none; position: fixed; top: 10px; left: 10px;
+            z-index: 101; background: rgba(16, 16, 36, 0.95);
+            border: 1px solid #444; border-radius: 6px; padding: 8px 12px;
+            color: #00d4ff; font-size: 1.2em; cursor: pointer;
+        }
+        .sidebar h1 { font-size: 1.3em; margin-bottom: 5px; color: #00d4ff; }
+        .sidebar .subtitle { font-size: 0.8em; color: #888; margin-bottom: 20px; }
+        .section { margin-bottom: 20px; }
+        .section h3 { font-size: 0.95em; color: #00d4ff; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #333; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            padding: 8px 14px; border: 1px solid #444; background: rgba(0, 212, 255, 0.1);
+            color: #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 0.85em;
+            transition: all 0.3s;
+        }
+        .btn:hover, .btn.active { background: rgba(0, 212, 255, 0.3); border-color: #00d4ff; }
+        .btn-import {
+            width: 100%; padding: 12px; background: rgba(76, 175, 80, 0.15);
+            border: 1px dashed #4CAF50; margin-bottom: 10px;
+        }
+        .btn-import:hover { background: rgba(76, 175, 80, 0.3); }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-item {
+            background: rgba(0, 212, 255, 0.05); border: 1px solid #333;
+            border-radius: 8px; padding: 12px; text-align: center;
+        }
+        .stat-value { font-size: 1.8em; font-weight: bold; color: #00d4ff; }
+        .stat-label { font-size: 0.75em; color: #888; margin-top: 4px; }
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 26, 46, 0.95); display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; transition: opacity 0.5s;
+        }
+        #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .spinner {
+            width: 50px; height: 50px; border: 3px solid #333;
+            border-top-color: #00d4ff; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .legend { position: fixed; bottom: 20px; right: 20px; background: rgba(16, 16, 36, 0.9);
+            border: 1px solid #333; border-radius: 10px; padding: 15px; z-index: 100;
+        }
+        .legend h4 { font-size: 0.85em; color: #00d4ff; margin-bottom: 10px; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.8em; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        #detail-panel {
+            position: fixed; top: 20px; right: 20px; width: 280px;
+            background: rgba(16, 16, 36, 0.95); border: 1px solid #333;
+            border-radius: 10px; padding: 15px; z-index: 100;
+            display: none;
+        }
+        #detail-panel h4 { color: #00d4ff; margin-bottom: 10px; }
+        #detail-panel .prop { font-size: 0.85em; margin-bottom: 5px; }
+        #detail-panel .prop span { color: #888; }
+        .btn-close {
+            position: absolute; top: 10px; right: 10px; background: none;
+            border: none; color: #888; cursor: pointer; font-size: 1.2em;
+        }
+        .btn-close:hover { color: #e0e0e0; }
+        .status-bar { position: fixed; top: 10px; right: 20px; font-size: 0.8em; color: #888; z-index: 100; }
+        .btn-export { width: 100%; padding: 10px; background: rgba(156, 39, 176, 0.15);
+            border-color: #9C27B0; margin-top: 10px;
+        }
+        .btn-export:hover { background: rgba(156, 39, 176, 0.3); }
+        #error-message {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(244, 67, 54, 0.9); color: white; padding: 20px;
+            border-radius: 10px; z-index: 2000; display: none; text-align: center;
+            max-width: 400px;
+        }
+        #error-message button {
+            margin-top: 10px; padding: 8px 16px; background: white;
+            color: #f44336; border: none; border-radius: 5px; cursor: pointer;
+        }
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .sidebar-toggle { display: block; }
+            .sidebar {
+                width: 280px; transform: translateX(-100%);
+                padding: 15px;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar h1 { font-size: 1.1em; }
+            .stat-item { padding: 8px; }
+            .stat-value { font-size: 1.4em; }
+            .legend { bottom: 10px; right: 10px; padding: 10px; }
+            .legend h4 { font-size: 0.75em; }
+            #detail-panel { width: 260px; top: 50px; right: 10px; }
+            .status-bar { right: 10px; font-size: 0.7em; top: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">正在加载本体数据...</div>
+</div>
+
+<div id="error-message">
+    <div id="error-text"></div>
+    <button onclick="hideError()">继续查看</button>
+</div>
+
+<div id="canvas-container"></div>
+
+<div class="sidebar" id="sidebar">
+    <h1>本体知识图谱</h1>
+    <div class="subtitle">Ontology Knowledge Graph</div>
+    
+    <div class="section">
+        <h3>展示模式</h3>
+        <div class="btn-group">
+            <button class="btn active" data-mode="classes" onclick="setMode('classes')">仅类</button>
+            <button class="btn" data-mode="props" onclick="setMode('props')">类 + 属性</button>
+            <button class="btn" data-mode="full" onclick="setMode('full')">全量</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>选项</h3>
+        <div class="btn-group">
+            <button class="btn active" id="btn-instances" onclick="toggleInstances()">显示实例</button>
+            <button class="btn active" id="btn-dataprops" onclick="toggleDataProps()">显示数据属性</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>导入知识文件</h3>
+        <button class="btn btn-import" onclick="document.getElementById('file-input').click()">
+            📁 导入 TTL/RDF 文件
+        </button>
+        <input type="file" id="file-input" accept=".ttl,.rdf,.n3,.nt" style="display:none" onchange="handleFileUpload(event)">
+    </div>
+    
+    <div class="section">
+        <h3>统计</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-classes">0</div>
+                <div class="stat-label">类</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-instances">0</div>
+                <div class="stat-label">实例</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-objprops">0</div>
+                <div class="stat-label">对象属性</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-dataprops">0</div>
+                <div class="stat-label">数据属性</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>导出</h3>
+        <button class="btn btn-export" onclick="exportPNG()">📷 导出 PNG</button>
+    </div>
+</div>
+
+<div class="legend">
+    <h4>图例</h4>
+    <div class="legend-item"><div class="legend-dot" style="background:#4FC3F7"></div>类</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#81C784"></div>实例</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FFB74D"></div>对象属性</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E57373"></div>数据属性</div>
+</div>
+
+<div id="detail-panel">
+    <button class="btn-close" onclick="closeDetail()">✕</button>
+    <h4 id="detail-title">详情</h4>
+    <div id="detail-content"></div>
+</div>
+
+<div class="status-bar" id="status-bar">等待加载...</div>
+
+<script>
+var scene, camera, renderer, controls;
+var nodeObjects = [];
+var edgeObjects = [];
+var ontologyData = { classes: {}, instances: {}, objProps: {}, datProps: {}, edges: [] };
+var currentMode = 'classes';
+var showInstances = true;
+var showDataProps = true;
+
+var nodeColors = {
+    'class': 0x4FC3F7,
+    'instance': 0x81C784,
+    'objProp': 0xFFB74D,
+    'datProp': 0xE57373
+};
+
+var selectedNode = null;
+var originalMaterials = [];
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function initThree() {
+    var container = document.getElementById('canvas-container');
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+    scene.fog = new THREE.FogExp2(0x1a1a2e, 0.002);
+    
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 50, 200);
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+    
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    
+    var ambientLight = new THREE.AmbientLight(0x404040, 2);
+    scene.add(ambientLight);
+    var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(50, 100, 50);
+    scene.add(dirLight);
+    
+    var gridHelper = new THREE.GridHelper(500, 20, 0x333333, 0x222222);
+    scene.add(gridHelper);
+    
+    window.addEventListener('resize', onResize);
+    
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+    
+    renderer.domElement.addEventListener('click', function(e) {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        var intersects = raycaster.intersectObjects(nodeObjects);
+        if (intersects.length > 0) {
+            var selectedMesh = intersects[0].object;
+            selectNode(selectedMesh);
+        }
+    });
+    
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// 节点选择和高亮功能
+function selectNode(mesh) {
+    // 如果点击的是已选中的节点，取消选择
+    if (selectedNode === mesh) {
+        deselectAll();
+        return;
+    }
+    
+    // 保存当前选中节点并取消高亮
+    if (selectedNode) {
+        restoreNodeMaterial(selectedNode);
+    }
+    
+    // 保存所有节点的原始材质
+    if (originalMaterials.length === 0) {
+        for (var i = 0; i < nodeObjects.length; i++) {
+            originalMaterials.push(nodeObjects[i].material);
+        }
+    }
+    
+    // 高亮选中的节点
+    selectNodeAndHighlight(mesh);
+    
+    // 更新详情面板
+    showDetail(mesh);
+}
+
+function selectNodeAndHighlight(mesh) {
+    selectedNode = mesh;
+    
+    // 设置选中节点的高亮样式
+    var selectedColor = 0xFFFFFF; // 白色高亮
+    var selectedEmissive = 0xFFFF00; // 黄色发光
+    
+    mesh.material.color.setHex(selectedColor);
+    mesh.material.emissive.setHex(selectedEmissive);
+    mesh.material.emissiveIntensity = 0.8;
+    mesh.material.opacity = 1.0;
+    
+    // 放大选中的节点
+    var originalScale = mesh.scale.clone();
+    mesh.scale.multiplyScalar(1.3);
+    mesh.userData.originalScale = originalScale;
+    
+    // 移动其他节点变暗
+    for (var i = 0; i < nodeObjects.length; i++) {
+        var node = nodeObjects[i];
+        if (node !== mesh) {
+            node.material.opacity = 0.3;
+        }
+    }
+    
+    // 相机聚焦到选中节点
+    focusCameraOnNode(mesh);
+}
+
+function focusCameraOnNode(mesh) {
+    var targetPosition = mesh.position.clone();
+    var cameraOffset = new THREE.Vector3(20, 15, 20); // 相机偏移量
+    
+    // 计算目标相机位置
+    var targetCameraPos = targetPosition.clone().add(cameraOffset);
+    
+    // 平滑过渡动画
+    var startPos = camera.position.clone();
+    var startTarget = controls.target.clone();
+    var endTarget = targetPosition.clone();
+    
+    var duration = 800; // 动画持续时间（毫秒）
+    var startTime = Date.now();
+    
+    function animateCamera() {
+        var elapsed = Date.now() - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        
+        // 使用缓动函数
+        var easeProgress = easeInOutCubic(progress);
+        
+        // 插值相机位置
+        camera.position.lerpVectors(startPos, targetCameraPos, easeProgress);
+        
+        // 插值控制器目标点
+        controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+        controls.update();
+        
+        if (progress < 1) {
+            requestAnimationFrame(animateCamera);
+        }
+    }
+    
+    animateCamera();
+}
+
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function restoreNodeMaterial(mesh) {
+    if (!mesh) return;
+    
+    // 恢复原始材质
+    var index = nodeObjects.indexOf(mesh);
+    if (index >= 0 && originalMaterials[index]) {
+        mesh.material = originalMaterials[index];
+    }
+    
+    // 恢复原始缩放
+    if (mesh.userData.originalScale) {
+        mesh.scale.copy(mesh.userData.originalScale);
+    }
+}
+
+function deselectAll() {
+    // 清除选中节点
+    if (selectedNode) {
+        restoreNodeMaterial(selectedNode);
+        selectedNode = null;
+    }
+    
+    // 恢复所有节点的不透明度
+    for (var i = 0; i < nodeObjects.length; i++) {
+        nodeObjects[i].material.opacity = 0.9;
+    }
+    
+    // 重置相机到默认位置
+    resetCameraToDefault();
+    
+    // 关闭详情面板
+    closeDetail();
+}
+
+function resetCameraToDefault() {
+    var startPos = camera.position.clone();
+    var startTarget = controls.target.clone();
+    var endPos = new THREE.Vector3(0, 50, 200);
+    var endTarget = new THREE.Vector3(0, 0, 0);
+    
+    var duration = 600;
+    var startTime = Date.now();
+    
+    function animateCamera() {
+        var elapsed = Date.now() - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        
+        var easeProgress = easeInOutCubic(progress);
+        
+        camera.position.lerpVectors(startPos, endPos, easeProgress);
+        controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+        controls.update();
+        
+        if (progress < 1) {
+            requestAnimationFrame(animateCamera);
+        }
+    }
+    
+    animateCamera();
+}
+
+// 生成文字标签精灵
+function createLabel(label, fontSize) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    // 自适应画布宽度
+    ctx.font = 'bold ' + fontSize + 'px -apple-system, Microsoft YaHei, sans-serif';
+    var textWidth = ctx.measureText(label).width;
+    canvas.width = Math.max(128, textWidth + 20);
+    canvas.height = 48;
+    
+    ctx.font = 'bold ' + fontSize + 'px -apple-system, Microsoft YaHei, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // 半透明背景
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    var padding = 6;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 文字
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(label, canvas.width / 2, canvas.height / 2);
+    
+    var texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    var spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    var scaleRatio = canvas.width / canvas.height;
+    sprite.scale.set(scaleRatio * 3, 3, 1);
+    return sprite;
+}
+
+function createNode(label, type, position) {
+    var color = nodeColors[type] || 0x4FC3F7;
+    var geometry;
+    
+    if (type === 'class') {
+        geometry = new THREE.SphereGeometry(3, 16, 16);
+    } else if (type === 'instance') {
+        geometry = new THREE.OctahedronGeometry(2, 0);
+    } else if (type === 'objProp') {
+        geometry = new THREE.ConeGeometry(1.5, 3, 8);
+    } else {
+        geometry = new THREE.TetrahedronGeometry(2, 0);
+    }
+    
+    var material = new THREE.MeshPhongMaterial({
+        color: color,
+        emissive: color,
+        emissiveIntensity: 0.2,
+        transparent: true,
+        opacity: 0.9
+    });
+    
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(position);
+    mesh.userData = { label: label, type: type, position: position.clone() };
+    
+    // 标签精灵（在节点上方）
+    var fontSize = type === 'instance' ? 20 : 24;
+    var labelSprite = createLabel(label, fontSize);
+    labelSprite.position.set(0, type === 'class' ? 5 : 4, 0);
+    mesh.add(labelSprite);
+    
+    return mesh;
+}
+
+function createEdge(start, end, label) {
+    var points = [start.clone(), end.clone()];
+    var geometry = new THREE.BufferGeometry().setFromPoints(points);
+    var material = new THREE.LineBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.3 });
+    var line = new THREE.Line(geometry, material);
+    line.userData = { label: label };
+    return line;
+}
+
+function stringifyNode(node) {
+    if (node.termType === 'NamedNode') return node.value;
+    if (node.termType === 'BlankNode') return '_' + node.value;
+    if (node.termType === 'Literal') return node.value;
+    if (node.termType === 'DefaultGraph') return '';
+    return String(node);
+}
+
+function getLocalName(uri) {
+    if (!uri) return '';
+    // 移除可能的冒号前缀
+    if (uri.startsWith(':')) {
+        uri = uri.substring(1);
+    }
+    var parts = uri.split('#');
+    if (parts.length > 1) return parts[parts.length - 1];
+    parts = uri.split('/');
+    return parts[parts.length - 1];
+}
+
+function loadOntologyFromText(ttlText, sourceName) {
+    console.log('开始解析本体:', sourceName);
+    
+    if (typeof N3 === 'undefined' || typeof N3.Parser === 'undefined') {
+        console.error('N3.js library not loaded!');
+        showError('N3.js 库加载失败，请检查网络连接后刷新页面');
+        return;
+    }
+    
+    try {
+        var parser = new N3.Parser();
+        var quads = parser.parse(ttlText);
+        
+        ontologyData = { classes: {}, instances: {}, objProps: {}, datProps: {}, edges: [] };
+        
+        var owlClass = 'http://www.w3.org/2002/07/owl#Class';
+        var owlObjectProperty = 'http://www.w3.org/2002/07/owl#ObjectProperty';
+        var owlDatatypeProperty = 'http://www.w3.org/2002/07/owl#DatatypeProperty';
+        var rdfType = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+        var rdfsLabel = 'http://www.w3.org/2000/01/rdf-schema#label';
+        var rdfsComment = 'http://www.w3.org/2000/01/rdf-schema#comment';
+        var rdfsSubClassOf = 'http://www.w3.org/2000/01/rdf-schema#subClassOf';
+        var rdfsDomain = 'http://www.w3.org/2000/01/rdf-schema#domain';
+        var rdfsRange = 'http://www.w3.org/2000/01/rdf-schema#range';
+        
+        for (var i = 0; i < quads.length; i++) {
+            var quad = quads[i];
+            var subj = stringifyNode(quad.subject);
+            var pred = quad.predicate.value;
+            var obj = stringifyNode(quad.object);
+            
+            if (pred === rdfType) {
+                if (obj === owlClass) {
+                    ontologyData.classes[subj] = { id: subj, label: getLocalName(subj), type: 'class', subClasses: [], superClass: null };
+                } else if (obj === owlObjectProperty) {
+                    ontologyData.objProps[subj] = { id: subj, label: getLocalName(subj), domain: '', range: '', objType: obj };
+                } else if (obj === owlDatatypeProperty) {
+                    ontologyData.datProps[subj] = { id: subj, label: getLocalName(subj), domain: '', range: '', objType: obj };
+                } else {
+                    ontologyData.instances[subj] = { id: subj, label: getLocalName(subj), type: obj };
+                }
+            }
+            
+            // 提取所有类型节点的 comment（不覆盖 label，label 保持 URI 本地名称）
+            if (pred === rdfsComment) {
+                if (ontologyData.classes[subj]) ontologyData.classes[subj].comment = obj;
+                else if (ontologyData.instances[subj]) ontologyData.instances[subj].comment = obj;
+                else if (ontologyData.objProps[subj]) ontologyData.objProps[subj].comment = obj;
+                else if (ontologyData.datProps[subj]) ontologyData.datProps[subj].comment = obj;
+            }
+        }
+        
+        for (var j = 0; j < quads.length; j++) {
+            var quad2 = quads[j];
+            var subj2 = stringifyNode(quad2.subject);
+            var pred2 = quad2.predicate.value;
+            var obj2 = stringifyNode(quad2.object);
+            
+            if (pred2 === rdfsSubClassOf && ontologyData.classes[subj2]) {
+                ontologyData.classes[subj2].superClass = obj2;
+                if (!ontologyData.classes[obj2]) {
+                    ontologyData.classes[obj2] = { id: obj2, label: getLocalName(obj2), type: 'class', subClasses: [], superClass: null };
+                }
+                ontologyData.classes[obj2].subClasses.push(subj2);
+            }
+            
+            if (pred2 === rdfsDomain && ontologyData.objProps[subj2]) {
+                ontologyData.objProps[subj2].domain = obj2;
+            }
+            if (pred2 === rdfsRange && ontologyData.objProps[subj2]) {
+                ontologyData.objProps[subj2].range = obj2;
+            }
+            if (pred2 === rdfsDomain && ontologyData.datProps[subj2]) {
+                ontologyData.datProps[subj2].domain = obj2;
+            }
+            if (pred2 === rdfsRange && ontologyData.datProps[subj2]) {
+                ontologyData.datProps[subj2].range = obj2;
+            }
+        }
+        
+        console.log('解析完成: ' + Object.keys(ontologyData.classes).length + ' 类, ' + 
+                   Object.keys(ontologyData.instances).length + ' 实例, ' + 
+                   Object.keys(ontologyData.objProps).length + ' 对象属性, ' + 
+                   Object.keys(ontologyData.datProps).length + ' 数据属性');
+        
+        updateStats();
+        renderGraph();
+        
+        document.getElementById('loading-overlay').classList.add('hidden');
+        document.getElementById('status-bar').textContent = '已加载: ' + sourceName;
+    } catch (error) {
+        console.error('解析失败:', error);
+        showError('TTL 解析失败: ' + error.message);
+    }
+}
+
+function updateStats() {
+    document.getElementById('stat-classes').textContent = Object.keys(ontologyData.classes).length;
+    document.getElementById('stat-instances').textContent = Object.keys(ontologyData.instances).length;
+    document.getElementById('stat-objprops').textContent = Object.keys(ontologyData.objProps).length;
+    document.getElementById('stat-dataprops').textContent = Object.keys(ontologyData.datProps).length;
+}
+
+var renderState = {
+    _nodesBatch: [],
+    _edgesBatch: [],
+    _currentNodeIdx: 0,
+    _currentEdgeIdx: 0,
+    _nodeBatchSize: 50,
+    _edgeBatchSize: 100,
+    _isRendering: false,
+    _onRenderComplete: null
+};
+
+function renderGraph() {
+    // 清理旧节点
+    for (var k = 0; k < nodeObjects.length; k++) scene.remove(nodeObjects[k]);
+    for (var m = 0; m < edgeObjects.length; m++) scene.remove(edgeObjects[m]);
+    nodeObjects = [];
+    edgeObjects = [];
+    
+    var classes = Object.keys(ontologyData.classes);
+    var instances = Object.keys(ontologyData.instances);
+    var objProps = Object.keys(ontologyData.objProps);
+    var datProps = Object.keys(ontologyData.datProps);
+    
+    // 大文件限制实例数量，避免渲染阻塞
+    var maxInstances = 500;
+    var actualInstances = instances;
+    if (instances.length > maxInstances) {
+        actualInstances = instances.slice(0, maxInstances);
+        console.warn('实例数量过多 (' + instances.length + ')，只显示前 ' + maxInstances + ' 个');
+    }
+    
+    var positions = {};
+    var classPositions = computeLayout(classes);
+    for (var key in classPositions) {
+        positions[key] = classPositions[key];
+    }
+    
+    var instanceId = 0;
+    for (var instIdx = 0; instIdx < actualInstances.length; instIdx++) {
+        var inst = ontologyData.instances[actualInstances[instIdx]];
+        var type = inst.type;
+        if (positions[type]) {
+            var offset = (instanceId % 6 - 3) * 10;
+            positions[actualInstances[instIdx]] = new THREE.Vector3(
+                positions[type].x + offset,
+                positions[type].y + 15 + Math.floor(instanceId / 6) * 15,
+                positions[type].z + ((instanceId % 6) * 5 - 12)
+            );
+        } else {
+            positions[actualInstances[instIdx]] = new THREE.Vector3((instanceId % 8 - 4) * 25, 20, (Math.floor(instanceId / 8) - 3) * 25);
+        }
+        instanceId++;
+    }
+    
+    var propId = 0;
+    for (var propIdx = 0; propIdx < objProps.length; propIdx++) {
+        var prop = ontologyData.objProps[objProps[propIdx]];
+        var pos;
+        if (positions[prop.domain] && positions[prop.range]) {
+            pos = new THREE.Vector3(
+                (positions[prop.domain].x + positions[prop.range].x) / 2,
+                (positions[prop.domain].y + positions[prop.range].y) / 2 + 15,
+                (positions[prop.domain].z + positions[prop.range].z) / 2
+            );
+        } else {
+            pos = new THREE.Vector3((propId % 6 - 3) * 30, 40, (Math.floor(propId / 6) - 2) * 30);
+        }
+        positions[objProps[propIdx]] = pos;
+        propId++;
+    }
+    
+    var dpId = 0;
+    for (var dpIdx = 0; dpIdx < datProps.length; dpIdx++) {
+        var dp = ontologyData.datProps[datProps[dpIdx]];
+        var pos2;
+        if (positions[dp.domain]) {
+            pos2 = new THREE.Vector3(
+                positions[dp.domain].x + 20,
+                positions[dp.domain].y + 10,
+                positions[dp.domain].z
+            );
+        } else {
+            pos2 = new THREE.Vector3((dpId % 4 - 2) * 35, 55, (Math.floor(dpId / 4) - 1) * 35);
+        }
+        positions[datProps[dpIdx]] = pos2;
+        dpId++;
+    }
+    
+    // 构建节点批次
+    renderState._nodesBatch = [];
+    renderState._currentNodeIdx = 0;
+    
+    var totalNodeCount = 0;
+    
+    if (currentMode !== 'classes' || currentMode === 'classes') {
+        for (var cIdx = 0; cIdx < classes.length; cIdx++) {
+            if (positions[classes[cIdx]]) {
+                renderState._nodesBatch.push({
+                    label: ontologyData.classes[classes[cIdx]].label,
+                    type: 'class',
+                    position: positions[classes[cIdx]]
+                });
+                totalNodeCount++;
+            }
+        }
+    }
+    
+    if (showInstances && currentMode === 'full') {
+        for (var iIdx = 0; iIdx < actualInstances.length; iIdx++) {
+            if (positions[actualInstances[iIdx]]) {
+                renderState._nodesBatch.push({
+                    label: ontologyData.instances[actualInstances[iIdx]].label,
+                    type: 'instance',
+                    position: positions[actualInstances[iIdx]]
+                });
+                totalNodeCount++;
+            }
+        }
+    }
+    
+    if (currentMode === 'full' || currentMode === 'props') {
+        for (var pIdx = 0; pIdx < objProps.length; pIdx++) {
+            if (positions[objProps[pIdx]]) {
+                renderState._nodesBatch.push({
+                    label: ontologyData.objProps[objProps[pIdx]].label,
+                    type: 'objProp',
+                    position: positions[objProps[pIdx]]
+                });
+                totalNodeCount++;
+            }
+        }
+    }
+    
+    if (showDataProps && currentMode === 'full') {
+        for (var dIdx = 0; dIdx < datProps.length; dIdx++) {
+            if (positions[datProps[dIdx]]) {
+                renderState._nodesBatch.push({
+                    label: ontologyData.datProps[datProps[dIdx]].label,
+                    type: 'datProp',
+                    position: positions[datProps[dIdx]]
+                });
+                totalNodeCount++;
+            }
+        }
+    }
+    
+    // 构建边批次
+    renderState._edgesBatch = [];
+    renderState._currentEdgeIdx = 0;
+    var totalEdgeCount = 0;
+    
+    for (var scIdx = 0; scIdx < classes.length; scIdx++) {
+        var cls = ontologyData.classes[classes[scIdx]];
+        if (cls.superClass && positions[cls.superClass] && positions[classes[scIdx]]) {
+            renderState._edgesBatch.push({
+                start: positions[cls.superClass],
+                end: positions[classes[scIdx]],
+                label: 'subClassOf'
+            });
+            totalEdgeCount++;
+        }
+        for (var childIdx = 0; childIdx < cls.subClasses.length; childIdx++) {
+            if (positions[classes[scIdx]] && positions[cls.subClasses[childIdx]]) {
+                renderState._edgesBatch.push({
+                    start: positions[cls.subClasses[childIdx]],
+                    end: positions[classes[scIdx]],
+                    label: 'subClassOf'
+                });
+                totalEdgeCount++;
+            }
+        }
+    }
+    
+    for (var opIdx = 0; opIdx < objProps.length; opIdx++) {
+        var op = ontologyData.objProps[objProps[opIdx]];
+        if (op.domain && positions[op.domain] && positions[objProps[opIdx]]) {
+            renderState._edgesBatch.push({
+                start: positions[op.domain],
+                end: positions[objProps[opIdx]],
+                label: 'domain'
+            });
+            totalEdgeCount++;
+        }
+        if (op.range && positions[op.range] && positions[objProps[opIdx]]) {
+            renderState._edgesBatch.push({
+                start: positions[objProps[opIdx]],
+                end: positions[op.range],
+                label: 'range'
+            });
+            totalEdgeCount++;
+        }
+    }
+    
+    // 更新加载提示
+    var statusEl = document.getElementById('status-bar');
+    var loadingEl = document.getElementById('loading-overlay');
+    if (totalNodeCount + totalEdgeCount > 100) {
+        if (!loadingEl.classList.contains('hidden')) {
+            document.getElementById('loading-text').textContent = '正在渲染 ' + totalNodeCount + ' 个节点...';
+        }
+    }
+    
+    // 分批渲染节点
+    renderBatchedNodes();
+}
+
+function renderBatchedNodes() {
+    if (renderState._currentNodeIdx >= renderState._nodesBatch.length) {
+        // 节点渲染完成，开始渲染边
+        renderBatchedEdges();
+        return;
+    }
+    
+    var endIdx = Math.min(
+        renderState._currentNodeIdx + renderState._nodeBatchSize,
+        renderState._nodesBatch.length
+    );
+    
+    for (var i = renderState._currentNodeIdx; i < endIdx; i++) {
+        var item = renderState._nodesBatch[i];
+        var node = createNode(item.label, item.type, item.position);
+        scene.add(node);
+        nodeObjects.push(node);
+    }
+    
+    renderState._currentNodeIdx = endIdx;
+    
+    // 更新进度
+    if (renderState._nodesBatch.length > 50) {
+        var loadingEl = document.getElementById('loading-overlay');
+        if (loadingEl && !loadingEl.classList.contains('hidden')) {
+            var progress = Math.round((renderState._currentNodeIdx / renderState._nodesBatch.length) * 100);
+            document.getElementById('loading-text').textContent = '渲染节点 ' + progress + '% (' + renderState._currentNodeIdx + '/' + renderState._nodesBatch.length + ')';
+        }
+    }
+    
+    // 用 requestAnimationFrame 继续下一批
+    requestAnimationFrame(function() {
+        renderBatchedNodes();
+    });
+}
+
+function renderBatchedEdges() {
+    if (renderState._currentEdgeIdx >= renderState._edgesBatch.length) {
+        // 全部完成
+        var loadingEl = document.getElementById('loading-overlay');
+        if (loadingEl) loadingEl.classList.add('hidden');
+        document.getElementById('status-bar').textContent = '已加载: ' + (renderState._renderedSourceName || '');
+        if (renderState._onRenderComplete) {
+            renderState._onRenderComplete();
+        }
+        return;
+    }
+    
+    var endIdx = Math.min(
+        renderState._currentEdgeIdx + renderState._edgeBatchSize,
+        renderState._edgesBatch.length
+    );
+    
+    for (var i = renderState._currentEdgeIdx; i < endIdx; i++) {
+        var item = renderState._edgesBatch[i];
+        var edge = createEdge(item.start, item.end, item.label);
+        scene.add(edge);
+        edgeObjects.push(edge);
+    }
+    
+    renderState._currentEdgeIdx = endIdx;
+    
+    // 用 requestAnimationFrame 继续下一批
+    requestAnimationFrame(function() {
+        renderBatchedEdges();
+    });
+}
+
+function computeLayout(classes) {
+    var positions = {};
+    var roots = [];
+    var others = [];
+    
+    for (var c = 0; c < classes.length; c++) {
+        var cls = ontologyData.classes[classes[c]];
+        if (!cls.superClass || !ontologyData.classes[cls.superClass]) {
+            roots.push(classes[c]);
+        } else {
+            others.push(classes[c]);
+        }
+    }
+    
+    for (var rootIdx = 0; rootIdx < roots.length; rootIdx++) {
+        var x = (rootIdx % 3 - 1) * 80;
+        var z = (Math.floor(rootIdx / 3) - 1) * 80;
+        positions[roots[rootIdx]] = new THREE.Vector3(x, 0, z);
+        
+        var queue = [roots[rootIdx]];
+        var visited = {};
+        visited[roots[rootIdx]] = true;
+        
+        for (var qIdx = 0; qIdx < queue.length; qIdx++) {
+            var current = queue[qIdx];
+            var currentClass = ontologyData.classes[current];
+            if (!currentClass) continue;
+            
+            for (var childIdx = 0; childIdx < currentClass.subClasses.length; childIdx++) {
+                var child = currentClass.subClasses[childIdx];
+                if (!visited[child]) {
+                    visited[child] = true;
+                    var idx = currentClass.subClasses.indexOf(child);
+                    var total = currentClass.subClasses.length;
+                    var angle = (idx / total) * Math.PI - Math.PI / 2;
+                    var radius = 20;
+                    var parentPos = positions[current];
+                    if (parentPos) {
+                        positions[child] = new THREE.Vector3(
+                            parentPos.x + Math.cos(angle) * radius,
+                            parentPos.y + 15,
+                            parentPos.z + Math.sin(angle) * radius
+                        );
+                    }
+                    queue.push(child);
+                }
+            }
+        }
+    }
+    
+    for (var oIdx = 0; oIdx < others.length; oIdx++) {
+        if (!positions[others[oIdx]]) {
+            positions[others[oIdx]] = new THREE.Vector3((oIdx % 5 - 2) * 40, -10, (Math.floor(oIdx / 5) - 2) * 40);
+        }
+    }
+    
+    return positions;
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    var buttons = document.querySelectorAll('.btn[data-mode]');
+    for (var b = 0; b < buttons.length; b++) {
+        buttons[b].classList.remove('active');
+    }
+    var activeBtn = document.querySelector('.btn[data-mode="' + mode + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+    renderGraph();
+}
+
+function toggleInstances() {
+    showInstances = !showInstances;
+    document.getElementById('btn-instances').classList.toggle('active');
+    renderGraph();
+}
+
+function toggleDataProps() {
+    showDataProps = !showDataProps;
+    document.getElementById('btn-dataprops').classList.toggle('active');
+    renderGraph();
+}
+
+function handleFileUpload(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        loadOntologyFromText(e.target.result, file.name);
+    };
+    reader.readAsText(file);
+}
+
+function showDetail(mesh) {
+    var panel = document.getElementById('detail-panel');
+    var data = mesh.userData;
+    
+    document.getElementById('detail-title').textContent = data.label;
+    
+    var html = '<div class="prop"><span>类型:</span> ' + data.type + '</div>';
+    if (data.type === 'class') {
+        var cls = ontologyData.classes[data.id];
+        if (cls) {
+            if (cls.superClass) html += '<div class="prop"><span>父类:</span> ' + getLocalName(cls.superClass) + '</div>';
+            html += '<div class="prop"><span>子类数:</span> ' + cls.subClasses.length + '</div>';
+            if (cls.comment) html += '<div class="prop"><span>说明:</span> ' + cls.comment + '</div>';
+        }
+    } else if (data.type === 'objProp') {
+        var prop = ontologyData.objProps[data.id];
+        if (prop) {
+            if (prop.domain) html += '<div class="prop"><span>定义域:</span> ' + getLocalName(prop.domain) + '</div>';
+            if (prop.range) html += '<div class="prop"><span>值域:</span> ' + getLocalName(prop.range) + '</div>';
+            if (prop.comment) html += '<div class="prop"><span>说明:</span> ' + prop.comment + '</div>';
+        }
+    } else if (data.type === 'datProp') {
+        var dp = ontologyData.datProps[data.id];
+        if (dp) {
+            if (dp.domain) html += '<div class="prop"><span>定义域:</span> ' + getLocalName(dp.domain) + '</div>';
+            if (dp.comment) html += '<div class="prop"><span>说明:</span> ' + dp.comment + '</div>';
+        }
+    } else if (data.type === 'instance') {
+        var inst = ontologyData.instances[data.id];
+        if (inst && inst.type) html += '<div class="prop"><span>类型:</span> ' + getLocalName(inst.type) + '</div>';
+    }
+    
+    document.getElementById('detail-content').innerHTML = html;
+    panel.style.display = 'block';
+}
+
+function closeDetail() {
+    document.getElementById('detail-panel').style.display = 'none';
+}
+
+function exportPNG() {
+    renderer.render(scene, camera);
+    var link = document.createElement('a');
+    link.download = 'ontology-graph.png';
+    link.href = renderer.domElement.toDataURL('image/png');
+    link.click();
+}
+
+function showError(message) {
+    var errorDiv = document.getElementById('error-message');
+    document.getElementById('error-text').innerHTML = message;
+    errorDiv.style.display = 'block';
+}
+
+function hideError() {
+    document.getElementById('error-message').style.display = 'none';
+}
+
+initThree();
+
+fetch('./risk_model.ttl')
+    .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        return response.text();
+    })
+    .then(function(ttlText) {
+        console.log('TTL loaded successfully, length:', ttlText.length);
+        loadOntologyFromText(ttlText, '金融风控本体');
+    })
+    .catch(function(error) {
+        console.error('Failed to load default TTL:', error);
+        showError('加载默认TTL文件失败: ' + error.message + '<br><br>请手动点击"导入 TTL/RDF 文件"上传文件');
+    });
+</script>
+
+</body>
+</html>
