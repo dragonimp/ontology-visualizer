@@ -34,8 +34,12 @@
 
 | 项 | 值 |
 |----|-----|
-| **部署服务器** | zz.impx.net |
-| **前端远程路径** | /var/www/ontology/（Nginx serve 静态文件） |
+|| **部署服务器** | zz.impx.net |
+|| **项目根目录** | /opt/ontology/ |
+|| **web 目录** | /opt/ontology/web/（Nginx serve 静态文件） |
+|| **api 目录** | /opt/ontology/api/ |
+|| **data 目录** | /opt/ontology/data/ |
+|| **备份目录** | /opt/backups/ontology/ |
 | **HTTPS** | ✅ 通配证书 (impx.net) — `/etc/letsencrypt/live/impx.net/` |
 
 ### 域名
