@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "name": "01_FRM_Ontology_Knowledge_Recording.ttl",
+      "size": 17150,
+      "url": "./01_FRM_Ontology_Knowledge_Recording.ttl"
+    },
+    {
+      "name": "bank-scene-indicators.ttl",
+      "size": 1300000,
+      "url": "./bank-scene-indicators.ttl"
+    },
+    {
+      "name": "指标模型.ttl",
+      "size": 16836,
+      "url": "./指标模型.ttl"
+    },
+    {
+      "name": "风控模型.ttl",
+      "size": 26067,
+      "url": "./风控模型.ttl"
+    }
+  ],
+  "count": 4
+}

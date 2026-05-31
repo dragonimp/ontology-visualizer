@@ -1,0 +1,308 @@
+@prefix : <http://example.org/frm#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+:Risk rdf:type owl:Class ;
+      rdfs:label "Risk"@en ;
+      rdfs:comment "The possibility of an event occurring that will have an impact on the achievement of objectives. Risk is measured in terms of impact and likelihood."@en ;
+      rdfs:subClassOf :Uncertainty .
+:Uncertainty rdf:type owl:Class ;
+            rdfs:label "Uncertainty"@en ;
+            rdfs:comment "A state of having limited knowledge where it is impossible to exactly describe existing state or future outcome, or more than one possible outcome."@en .
+:RiskManagement rdf:type owl:Class ;
+               rdfs:label "Risk Management"@en ;
+               rdfs:comment "The process of identifying, assessing, and controlling threats to an organization's capital and earnings."@en ;
+               rdfs:subClassOf :BusinessProcess .
+:RiskTaking rdf:type owl:Class ;
+           rdfs:label "Risk Taking"@en ;
+           rdfs:comment "The deliberate acceptance of risk in pursuit of reward or opportunity."@en ;
+           rdfs:subClassOf :StrategicDecision .
+
+:managesRisk rdf:type owl:ObjectProperty ;
+            rdfs:domain :RiskManagement ;
+            rdfs:range :Risk ;
+            rdfs:label "manages risk"@en .
+:takesRisk rdf:type owl:ObjectProperty ;
+          rdfs:domain :RiskTaking ;
+          rdfs:range :Risk ;
+          rdfs:label "takes risk"@en .
+:hasDimension rdf:type owl:ObjectProperty ;
+             rdfs:domain :Risk ;
+             rdfs:range :RiskDimension ;
+             rdfs:label "has dimension"@en .
+:RiskDimension rdf:type owl:Class ;
+              rdfs:label "Risk Dimension"@en ;
+              rdfs:comment "Aspects or perspectives from which risk can be viewed."@en ;
+              rdfs:subClassOf :Concept .
+
+:UncertaintyDimension rdf:type owl:Class ;
+                     rdfs:label "Uncertainty Dimension"@en ;
+                     rdfs:subClassOf :RiskDimension .
+:FutureOrientationDimension rdf:type owl:Class ;
+                          rdfs:label "Future Orientation Dimension"@en ;
+                          rdfs:subClassOf :RiskDimension .
+:LossPotentialDimension rdf:type owl:Class ;
+                       rdfs:label "Loss Potential Dimension"@en ;
+                       rdfs:subClassOf :RiskDimension .
+
+:hasProbability rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Risk ;
+               rdfs:range xsd:decimal ;
+               rdfs:label "has probability"@en .
+:hasImpact rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Risk ;
+          rdfs:range xsd:decimal ;
+          rdfs:label "has impact"@en .
+:hasTimeHorizon rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Risk ;
+              rdfs:range xsd:duration ;
+              rdfs:label "has time horizon"@en .
+
+:RiskManagementProcess rdf:type owl:Class ;
+                      rdfs:label "Risk Management Process"@en ;
+                      rdfs:comment "The systematic process for identifying, assessing, and responding to risk."@en ;
+                      rdfs:subClassOf :BusinessProcess .
+:hasStep rdf:type owl:ObjectProperty ;
+        rdfs:domain :RiskManagementProcess ;
+        rdfs:range :ProcessStep ;
+        rdfs:label "has step"@en .
+:ProcessStep rdf:type owl:Class ;
+            rdfs:label "Process Step"@en ;
+            rdfs:comment "A discrete phase or activity within a larger process."@en .
+
+:RiskIdentification rdf:type owl:Class ;
+                   rdfs:label "Risk Identification"@en ;
+                   rdfs:subClassOf :ProcessStep ;
+                   rdfs:comment "The process of finding, recognizing, and describing risks."@en .
+:RiskAssessment rdf:type owl:Class ;
+               rdfs:label "Risk Assessment"@en ;
+               rdfs:subClassOf :ProcessStep ;
+               rdfs:comment "The process of analyzing identified risks to determine their likelihood and impact."@en .
+:RiskResponse rdf:type owl:Class ;
+             rdfs:label "Risk Response"@en ;
+             rdfs:subClassOf :ProcessStep ;
+             rdfs:comment "The process of developing and implementing strategies to address identified risks."@en .
+:RiskMonitoring rdf:type owl:Class ;
+               rdfs:label "Risk Monitoring"@en ;
+               rdfs:subClassOf :ProcessStep ;
+               rdfs:comment "The process of tracking identified risks, monitoring residual risks, and evaluating risk process effectiveness."@en .
+
+:AvoidanceStrategy rdf:type owl:Class ;
+                  rdfs:label "Avoidance Strategy"@en ;
+                  rdfs:subClassOf :RiskResponse ;
+                  rdfs:comment "Eliminating the risk by not undertaking the activity that creates it."@en .
+:ReductionStrategy rdf:type owl:Class ;
+                  rdfs:label "Reduction Strategy"@en ;
+                  rdfs:subClassOf :RiskResponse ;
+                  rdfs:comment "Implementing controls to reduce the likelihood or impact of the risk."@en .
+:TransferStrategy rdf:type owl:Class ;
+                 rdfs:label "Transfer Strategy"@en ;
+                 rdfs:subClassOf :RiskResponse ;
+                 rdfs:comment "Shifting the risk to another party, such as through insurance or derivatives."@en .
+:AcceptanceStrategy rdf:type owl:Class ;
+                   rdfs:label "Acceptance Strategy"@en ;
+                   rdfs:subClassOf :RiskResponse ;
+                   rdfs:comment "Acknowledging the risk and being prepared to bear the consequences if it occurs."@en .
+
+:RiskMeasurementTool rdf:type owl:Class ;
+                    rdfs:label "Risk Measurement Tool"@en ;
+                    rdfs:comment "Quantitative or qualitative methods for assessing risk."@en ;
+                    rdfs:subClassOf :Tool .
+:ValueAtRisk rdf:type owl:Class ;
+            rdfs:label "Value at Risk"@en ;
+            rdfs:subClassOf :RiskMeasurementTool ;
+            rdfs:comment "A statistical measure of the maximum potential loss over a specified time horizon at a given confidence level."@en .
+:ExpectedShortfall rdf:type owl:Class ;
+                  rdfs:label "Expected Shortfall"@en ;
+                  rdfs:subClassOf :RiskMeasurementTool ;
+                  rdfs:comment "The average loss conditional on the loss exceeding the VaR threshold, also known as Conditional VaR."@en .
+:StressTesting rdf:type owl:Class ;
+              rdfs:label "Stress Testing"@en ;
+              rdfs:subClassOf :RiskMeasurementTool ;
+              rdfs:comment "A simulation technique used to evaluate the impact of hypothetical adverse scenarios on an organization."@en .
+
+:ParametricVaR rdf:type owl:Class ;
+              rdfs:label "Parametric VaR"@en ;
+              rdfs:subClassOf :ValueAtRisk ;
+              rdfs:comment "VaR calculated using the variance-covariance method, assuming normal distribution of returns."@en .
+:HistoricalSimulationVaR rdf:type owl:Class ;
+                        rdfs:label "Historical Simulation VaR"@en ;
+                        rdfs:subClassOf :ValueAtRisk ;
+                        rdfs:comment "VaR calculated by applying historical return data to current positions."@en .
+:MonteCarloVaR rdf:type owl:Class ;
+              rdfs:label "Monte Carlo VaR"@en ;
+              rdfs:subClassOf :ValueAtRisk ;
+              rdfs:comment "VaR calculated by simulating thousands of possible future scenarios using statistical models."@en .
+
+:EnterpriseRiskManagement rdf:type owl:Class ;
+                         rdfs:label "Enterprise Risk Management"@en ;
+                         rdfs:comment "An integrated approach to managing all risks across an organization."@en ;
+                         rdfs:subClassOf :RiskManagement .
+:hasComponent rdf:type owl:ObjectProperty ;
+             rdfs:domain :EnterpriseRiskManagement ;
+             rdfs:range :ERMComponent ;
+             rdfs:label "has component"@en .
+:ERMComponent rdf:type owl:Class ;
+             rdfs:label "ERM Component"@en ;
+             rdfs:comment "A major element of an ERM framework."@en .
+
+:GovernanceAndCulture rdf:type owl:Class ;
+                     rdfs:label "Governance and Culture"@en ;
+                     rdfs:subClassOf :ERMComponent ;
+                     rdfs:comment "The tone at the top and organizational attitudes toward risk."@en .
+:StrategyAndObjectiveSetting rdf:type owl:Class ;
+                            rdfs:label "Strategy and Objective Setting"@en ;
+                            rdfs:subClassOf :ERMComponent ;
+                            rdfs:comment "Alignment of risk management with business strategy."@en .
+:Performance rdf:type owl:Class ;
+            rdfs:label "Performance"@en ;
+            rdfs:subClassOf :ERMComponent ;
+            rdfs:comment "The execution of risk management activities."@en .
+:ReviewAndRevision rdf:type owl:Class ;
+                  rdfs:label "Review and Revision"@en ;
+                  rdfs:subClassOf :ERMComponent ;
+                  rdfs:comment "Ongoing assessment and improvement of the risk management framework."@en .
+:InformationCommunicationAndReporting rdf:type owl:Class ;
+                                     rdfs:label "Information, Communication and Reporting"@en ;
+                                     rdfs:subClassOf :ERMComponent ;
+                                     rdfs:comment "Systems for capturing and sharing risk information."@en .
+
+:Hedging rdf:type owl:Class ;
+        rdfs:label "Hedging"@en ;
+        rdfs:comment "The use of financial instruments to reduce or eliminate the risk of adverse price movements."@en ;
+        rdfs:subClassOf :RiskResponse .
+:HedgeInstrument rdf:type owl:Class ;
+                rdfs:label "Hedge Instrument"@en ;
+                rdfs:comment "A financial instrument used for hedging purposes."@en ;
+                rdfs:subClassOf :FinancialInstrument .
+
+:ForwardContract rdf:type owl:Class ;
+                rdfs:label "Forward Contract"@en ;
+                rdfs:subClassOf :HedgeInstrument ;
+                rdfs:comment "A customized agreement to buy or sell an asset at a predetermined price on a future date."@en .
+:FuturesContract rdf:type owl:Class ;
+                rdfs:label "Futures Contract"@en ;
+                rdfs:subClassOf :HedgeInstrument ;
+                rdfs:comment "A standardized exchange-traded forward contract."@en .
+:Option rdf:type owl:Class ;
+       rdfs:label "Option"@en ;
+       rdfs:subClassOf :HedgeInstrument ;
+       rdfs:comment "A contract giving the buyer the right, but not the obligation, to buy or sell an asset at a predetermined price."@en .
+:Swap rdf:type owl:Class ;
+     rdfs:label "Swap"@en ;
+     rdfs:subClassOf :HedgeInstrument ;
+     rdfs:comment "An agreement to exchange cash flows or other financial instruments."@en .
+
+:HedgingAdvantage rdf:type owl:Class ;
+                 rdfs:label "Hedging Advantage"@en ;
+                 rdfs:comment "A benefit or positive outcome from hedging."@en ;
+                 rdfs:subClassOf :Advantage .
+:EarningsPredictability rdf:type owl:Class ;
+                       rdfs:label "Earnings Predictability"@en ;
+                       rdfs:subClassOf :HedgingAdvantage ;
+                       rdfs:comment "Reduction in earnings volatility through hedging."@en .
+:CashFlowCertainty rdf:type owl:Class ;
+                  rdfs:label "Cash Flow Certainty"@en ;
+                  rdfs:subClassOf :HedgingAdvantage ;
+                  rdfs:comment "Increased predictability of future cash flows."@en .
+:CostOfCapitalReduction rdf:type owl:Class ;
+                       rdfs:label "Cost of Capital Reduction"@en ;
+                       rdfs:subClassOf :HedgingAdvantage ;
+                       rdfs:comment "Lower financing costs due to reduced perceived risk."@en .
+
+:HedgingDisadvantage rdf:type owl:Class ;
+                    rdfs:label "Hedging Disadvantage"@en ;
+                    rdfs:comment "A cost or negative outcome from hedging."@en ;
+                    rdfs:subClassOf :Disadvantage .
+:HedgingCost rdf:type owl:Class ;
+            rdfs:label "Hedging Cost"@en ;
+            rdfs:subClassOf :HedgingDisadvantage ;
+            rdfs:comment "Direct expenses associated with hedging instruments and activities."@en .
+:BasisRisk rdf:type owl:Class ;
+          rdfs:label "Basis Risk"@en ;
+          rdfs:subClassOf :HedgingDisadvantage ;
+          rdfs:comment "Risk arising from imperfect correlation between the hedge instrument and the underlying exposure."@en .
+:OpportunityCost rdf:type owl:Class ;
+                rdfs:label "Opportunity Cost"@en ;
+                rdfs:subClassOf :HedgingDisadvantage ;
+                rdfs:comment "Lost gains if prices move favorably after hedging."@en .
+
+:HedgingDecisionFramework rdf:type owl:Class ;
+                         rdfs:label "Hedging Decision Framework"@en ;
+                         rdfs:comment "A structured approach to deciding whether and how to hedge."@en ;
+                         rdfs:subClassOf :DecisionFramework .
+:CostBenefitAnalysis rdf:type owl:Class ;
+                    rdfs:label "Cost-Benefit Analysis"@en ;
+                    rdfs:subClassOf :HedgingDecisionFramework ;
+                    rdfs:comment "Comparison of hedging costs with risk reduction benefits."@en .
+:hasDecisionFactor rdf:type owl:ObjectProperty ;
+                  rdfs:domain :HedgingDecisionFramework ;
+                  rdfs:range :DecisionFactor ;
+                  rdfs:label "has decision factor"@en .
+:DecisionFactor rdf:type owl:Class ;
+               rdfs:label "Decision Factor"@en ;
+               rdfs:comment "A consideration in the hedging decision."@en .
+
+:RiskAppetite rdf:type owl:Class ;
+             rdfs:label "Risk Appetite"@en ;
+             rdfs:comment "The amount and type of risk an organization is willing to pursue or retain to achieve its strategic objectives."@en ;
+             rdfs:subClassOf :GovernanceConcept .
+:RiskCapacity rdf:type owl:Class ;
+             rdfs:label "Risk Capacity"@en ;
+             rdfs:comment "The maximum amount of risk an organization can bear given its financial and operational resources."@en ;
+             rdfs:subClassOf :GovernanceConcept .
+:RiskTolerance rdf:type owl:Class ;
+              rdfs:label "Risk Tolerance"@en ;
+              rdfs:comment "The acceptable variation in outcomes relative to objectives."@en ;
+              rdfs:subClassOf :GovernanceConcept .
+
+:RiskAppetiteStatement rdf:type owl:Class ;
+                      rdfs:label "Risk Appetite Statement"@en ;
+                      rdfs:comment "A formal document articulating the organization's risk appetite."@en ;
+                      rdfs:subClassOf :PolicyDocument .
+:hasQuantitativeLimit rdf:type owl:ObjectProperty ;
+                     rdfs:domain :RiskAppetiteStatement ;
+                     rdfs:range :QuantitativeLimit ;
+                     rdfs:label "has quantitative limit"@en .
+:hasQualitativeBoundary rdf:type owl:ObjectProperty ;
+                       rdfs:domain :RiskAppetiteStatement ;
+                       rdfs:range :QualitativeBoundary ;
+                       rdfs:label "has qualitative boundary"@en .
+
+:QuantitativeLimit rdf:type owl:Class ;
+                  rdfs:label "Quantitative Limit"@en ;
+                  rdfs:comment "A numerical constraint on risk-taking."@en ;
+                  rdfs:subClassOf :RiskLimit .
+:ValueAtRiskLimit rdf:type owl:Class ;
+                 rdfs:label "Value at Risk Limit"@en ;
+                 rdfs:subClassOf :QuantitativeLimit ;
+                 rdfs:comment "Maximum VaR at specified confidence level and time horizon."@en .
+:EarningsAtRiskLimit rdf:type owl:Class ;
+                    rdfs:label "Earnings at Risk Limit"@en ;
+                    rdfs:subClassOf :QuantitativeLimit ;
+                    rdfs:comment "Maximum acceptable impact on earnings."@en .
+:ConcentrationLimit rdf:type owl:Class ;
+                   rdfs:label "Concentration Limit"@en ;
+                   rdfs:subClassOf :QuantitativeLimit ;
+                   rdfs:comment "Maximum exposure to a single counterparty, sector, or geography."@en .
+
+:QualitativeBoundary rdf:type owl:Class ;
+                    rdfs:label "Qualitative Boundary"@en ;
+                    rdfs:comment "A non-numerical constraint on risk-taking."@en ;
+                    rdfs:subClassOf :RiskLimit .
+:ProhibitedActivity rdf:type owl:Class ;
+                   rdfs:label "Prohibited Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Types of risks that are never undertaken."@en .
+:ControlledActivity rdf:type owl:Class ;
+                   rdfs:label "Controlled Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Risks allowed only with specific controls and approvals."@en .
+:EncouragedActivity rdf:type owl:Class ;
+                   rdfs:label "Encouraged Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Risks aligned with strategy and encouraged."@en .
+

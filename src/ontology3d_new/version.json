@@ -1,0 +1,17 @@
+{
+  "name": "Ontology Visualizer",
+  "version": "0.1.0",
+  "buildDate": "2026-05-27T11:45:00+08:00",
+  "buildNumber": 4,
+  "description": "Ontology Visualizer v0.1.0 — 本体语义可视化展示（3D 球形分层布局 + Fibonacci Sphere + 粒子星空）",
+  "techStack": [
+    "Vanilla JS + Three.js + N3.js",
+    "Fibonacci Sphere 3D 布局",
+    "TTL 解析 + 贝塞尔弧线连接"
+  ],
+  "lastDeploy": {
+    "version": "20260527-1145-loading-fix + 3d-verify",
+    "url": "https://ontology3d.ai.impx.net/index.html",
+    "status": "✅ 正常"
+  }
+}

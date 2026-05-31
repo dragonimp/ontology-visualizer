@@ -1,0 +1,1016 @@
+@prefix : <http://example.org/frm#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+:Risk rdf:type owl:Class ;
+      rdfs:label "Risk"@en ;
+      rdfs:comment "The possibility of an event occurring that will have an impact on the achievement of objectives. Risk is measured in terms of impact and likelihood."@en ;
+      rdfs:subClassOf :Uncertainty .
+:Uncertainty rdf:type owl:Class ;
+            rdfs:label "Uncertainty"@en ;
+            rdfs:comment "A state of having limited knowledge where it is impossible to exactly describe existing state or future outcome, or more than one possible outcome."@en .
+:RiskManagement rdf:type owl:Class ;
+               rdfs:label "Risk Management"@en ;
+               rdfs:comment "The process of identifying, assessing, and controlling threats to an organization's capital and earnings."@en ;
+               rdfs:subClassOf :BusinessProcess .
+:RiskTaking rdf:type owl:Class ;
+           rdfs:label "Risk Taking"@en ;
+           rdfs:comment "The deliberate acceptance of risk in pursuit of reward or opportunity."@en ;
+           rdfs:subClassOf :StrategicDecision .
+
+:managesRisk rdf:type owl:ObjectProperty ;
+            rdfs:domain :RiskManagement ;
+            rdfs:range :Risk ;
+            rdfs:label "manages risk"@en .
+:takesRisk rdf:type owl:ObjectProperty ;
+          rdfs:domain :RiskTaking ;
+          rdfs:range :Risk ;
+          rdfs:label "takes risk"@en .
+:hasDimension rdf:type owl:ObjectProperty ;
+             rdfs:domain :Risk ;
+             rdfs:range :RiskDimension ;
+             rdfs:label "has dimension"@en .
+:RiskDimension rdf:type owl:Class ;
+              rdfs:label "Risk Dimension"@en ;
+              rdfs:comment "Aspects or perspectives from which risk can be viewed."@en ;
+              rdfs:subClassOf :Concept .
+
+:UncertaintyDimension rdf:type owl:Class ;
+                     rdfs:label "Uncertainty Dimension"@en ;
+                     rdfs:subClassOf :RiskDimension .
+:FutureOrientationDimension rdf:type owl:Class ;
+                          rdfs:label "Future Orientation Dimension"@en ;
+                          rdfs:subClassOf :RiskDimension .
+:LossPotentialDimension rdf:type owl:Class ;
+                       rdfs:label "Loss Potential Dimension"@en ;
+                       rdfs:subClassOf :RiskDimension .
+
+:hasProbability rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Risk ;
+               rdfs:range xsd:decimal ;
+               rdfs:label "has probability"@en .
+:hasImpact rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Risk ;
+          rdfs:range xsd:decimal ;
+          rdfs:label "has impact"@en .
+:hasTimeHorizon rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Risk ;
+              rdfs:range xsd:duration ;
+              rdfs:label "has time horizon"@en .
+
+:RiskManagementProcess rdf:type owl:Class ;
+                      rdfs:label "Risk Management Process"@en ;
+                      rdfs:comment "The systematic process for identifying, assessing, and responding to risk."@en ;
+                      rdfs:subClassOf :BusinessProcess .
+:hasStep rdf:type owl:ObjectProperty ;
+        rdfs:domain :RiskManagementProcess ;
+        rdfs:range :ProcessStep ;
+        rdfs:label "has step"@en .
+:ProcessStep rdf:type owl:Class ;
+            rdfs:label "Process Step"@en ;
+            rdfs:comment "A discrete phase or activity within a larger process."@en .
+
+:RiskIdentification rdf:type owl:Class ;
+                   rdfs:label "Risk Identification"@en ;
+                   rdfs:subClassOf :ProcessStep ;
+                   rdfs:comment "The process of finding, recognizing, and describing risks."@en .
+:RiskAssessment rdf:type owl:Class ;
+               rdfs:label "Risk Assessment"@en ;
+               rdfs:subClassOf :ProcessStep ;
+               rdfs:comment "The process of analyzing identified risks to determine their likelihood and impact."@en .
+:RiskResponse rdf:type owl:Class ;
+             rdfs:label "Risk Response"@en ;
+             rdfs:subClassOf :ProcessStep ;
+             rdfs:comment "The process of developing and implementing strategies to address identified risks."@en .
+:RiskMonitoring rdf:type owl:Class ;
+               rdfs:label "Risk Monitoring"@en ;
+               rdfs:subClassOf :ProcessStep ;
+               rdfs:comment "The process of tracking identified risks, monitoring residual risks, and evaluating risk process effectiveness."@en .
+
+:AvoidanceStrategy rdf:type owl:Class ;
+                  rdfs:label "Avoidance Strategy"@en ;
+                  rdfs:subClassOf :RiskResponse ;
+                  rdfs:comment "Eliminating the risk by not undertaking the activity that creates it."@en .
+:ReductionStrategy rdf:type owl:Class ;
+                  rdfs:label "Reduction Strategy"@en ;
+                  rdfs:subClassOf :RiskResponse ;
+                  rdfs:comment "Implementing controls to reduce the likelihood or impact of the risk."@en .
+:TransferStrategy rdf:type owl:Class ;
+                 rdfs:label "Transfer Strategy"@en ;
+                 rdfs:subClassOf :RiskResponse ;
+                 rdfs:comment "Shifting the risk to another party, such as through insurance or derivatives."@en .
+:AcceptanceStrategy rdf:type owl:Class ;
+                   rdfs:label "Acceptance Strategy"@en ;
+                   rdfs:subClassOf :RiskResponse ;
+                   rdfs:comment "Acknowledging the risk and being prepared to bear the consequences if it occurs."@en .
+
+:RiskMeasurementTool rdf:type owl:Class ;
+                    rdfs:label "Risk Measurement Tool"@en ;
+                    rdfs:comment "Quantitative or qualitative methods for assessing risk."@en ;
+                    rdfs:subClassOf :Tool .
+:ValueAtRisk rdf:type owl:Class ;
+            rdfs:label "Value at Risk"@en ;
+            rdfs:subClassOf :RiskMeasurementTool ;
+            rdfs:comment "A statistical measure of the maximum potential loss over a specified time horizon at a given confidence level."@en .
+:ExpectedShortfall rdf:type owl:Class ;
+                  rdfs:label "Expected Shortfall"@en ;
+                  rdfs:subClassOf :RiskMeasurementTool ;
+                  rdfs:comment "The average loss conditional on the loss exceeding the VaR threshold, also known as Conditional VaR."@en .
+:StressTesting rdf:type owl:Class ;
+              rdfs:label "Stress Testing"@en ;
+              rdfs:subClassOf :RiskMeasurementTool ;
+              rdfs:comment "A simulation technique used to evaluate the impact of hypothetical adverse scenarios on an organization."@en .
+
+:ParametricVaR rdf:type owl:Class ;
+              rdfs:label "Parametric VaR"@en ;
+              rdfs:subClassOf :ValueAtRisk ;
+              rdfs:comment "VaR calculated using the variance-covariance method, assuming normal distribution of returns."@en .
+:HistoricalSimulationVaR rdf:type owl:Class ;
+                        rdfs:label "Historical Simulation VaR"@en ;
+                        rdfs:subClassOf :ValueAtRisk ;
+                        rdfs:comment "VaR calculated by applying historical return data to current positions."@en .
+:MonteCarloVaR rdf:type owl:Class ;
+              rdfs:label "Monte Carlo VaR"@en ;
+              rdfs:subClassOf :ValueAtRisk ;
+              rdfs:comment "VaR calculated by simulating thousands of possible future scenarios using statistical models."@en .
+
+:EnterpriseRiskManagement rdf:type owl:Class ;
+                         rdfs:label "Enterprise Risk Management"@en ;
+                         rdfs:comment "An integrated approach to managing all risks across an organization."@en ;
+                         rdfs:subClassOf :RiskManagement .
+:hasComponent rdf:type owl:ObjectProperty ;
+             rdfs:domain :EnterpriseRiskManagement ;
+             rdfs:range :ERMComponent ;
+             rdfs:label "has component"@en .
+:ERMComponent rdf:type owl:Class ;
+             rdfs:label "ERM Component"@en ;
+             rdfs:comment "A major element of an ERM framework."@en .
+
+:GovernanceAndCulture rdf:type owl:Class ;
+                     rdfs:label "Governance and Culture"@en ;
+                     rdfs:subClassOf :ERMComponent ;
+                     rdfs:comment "The tone at the top and organizational attitudes toward risk."@en .
+:StrategyAndObjectiveSetting rdf:type owl:Class ;
+                            rdfs:label "Strategy and Objective Setting"@en ;
+                            rdfs:subClassOf :ERMComponent ;
+                            rdfs:comment "Alignment of risk management with business strategy."@en .
+:Performance rdf:type owl:Class ;
+            rdfs:label "Performance"@en ;
+            rdfs:subClassOf :ERMComponent ;
+            rdfs:comment "The execution of risk management activities."@en .
+:ReviewAndRevision rdf:type owl:Class ;
+                  rdfs:label "Review and Revision"@en ;
+                  rdfs:subClassOf :ERMComponent ;
+                  rdfs:comment "Ongoing assessment and improvement of the risk management framework."@en .
+:InformationCommunicationAndReporting rdf:type owl:Class ;
+                                     rdfs:label "Information, Communication and Reporting"@en ;
+                                     rdfs:subClassOf :ERMComponent ;
+                                     rdfs:comment "Systems for capturing and sharing risk information."@en .
+
+:Hedging rdf:type owl:Class ;
+        rdfs:label "Hedging"@en ;
+        rdfs:comment "The use of financial instruments to reduce or eliminate the risk of adverse price movements."@en ;
+        rdfs:subClassOf :RiskResponse .
+:HedgeInstrument rdf:type owl:Class ;
+                rdfs:label "Hedge Instrument"@en ;
+                rdfs:comment "A financial instrument used for hedging purposes."@en ;
+                rdfs:subClassOf :FinancialInstrument .
+
+:ForwardContract rdf:type owl:Class ;
+                rdfs:label "Forward Contract"@en ;
+                rdfs:subClassOf :HedgeInstrument ;
+                rdfs:comment "A customized agreement to buy or sell an asset at a predetermined price on a future date."@en .
+:FuturesContract rdf:type owl:Class ;
+                rdfs:label "Futures Contract"@en ;
+                rdfs:subClassOf :HedgeInstrument ;
+                rdfs:comment "A standardized exchange-traded forward contract."@en .
+:Option rdf:type owl:Class ;
+       rdfs:label "Option"@en ;
+       rdfs:subClassOf :HedgeInstrument ;
+       rdfs:comment "A contract giving the buyer the right, but not the obligation, to buy or sell an asset at a predetermined price."@en .
+:Swap rdf:type owl:Class ;
+     rdfs:label "Swap"@en ;
+     rdfs:subClassOf :HedgeInstrument ;
+     rdfs:comment "An agreement to exchange cash flows or other financial instruments."@en .
+
+:HedgingAdvantage rdf:type owl:Class ;
+                 rdfs:label "Hedging Advantage"@en ;
+                 rdfs:comment "A benefit or positive outcome from hedging."@en ;
+                 rdfs:subClassOf :Advantage .
+:EarningsPredictability rdf:type owl:Class ;
+                       rdfs:label "Earnings Predictability"@en ;
+                       rdfs:subClassOf :HedgingAdvantage ;
+                       rdfs:comment "Reduction in earnings volatility through hedging."@en .
+:CashFlowCertainty rdf:type owl:Class ;
+                  rdfs:label "Cash Flow Certainty"@en ;
+                  rdfs:subClassOf :HedgingAdvantage ;
+                  rdfs:comment "Increased predictability of future cash flows."@en .
+:CostOfCapitalReduction rdf:type owl:Class ;
+                       rdfs:label "Cost of Capital Reduction"@en ;
+                       rdfs:subClassOf :HedgingAdvantage ;
+                       rdfs:comment "Lower financing costs due to reduced perceived risk."@en .
+
+:HedgingDisadvantage rdf:type owl:Class ;
+                    rdfs:label "Hedging Disadvantage"@en ;
+                    rdfs:comment "A cost or negative outcome from hedging."@en ;
+                    rdfs:subClassOf :Disadvantage .
+:HedgingCost rdf:type owl:Class ;
+            rdfs:label "Hedging Cost"@en ;
+            rdfs:subClassOf :HedgingDisadvantage ;
+            rdfs:comment "Direct expenses associated with hedging instruments and activities."@en .
+:BasisRisk rdf:type owl:Class ;
+          rdfs:label "Basis Risk"@en ;
+          rdfs:subClassOf :HedgingDisadvantage ;
+          rdfs:comment "Risk arising from imperfect correlation between the hedge instrument and the underlying exposure."@en .
+:OpportunityCost rdf:type owl:Class ;
+                rdfs:label "Opportunity Cost"@en ;
+                rdfs:subClassOf :HedgingDisadvantage ;
+                rdfs:comment "Lost gains if prices move favorably after hedging."@en .
+
+:HedgingDecisionFramework rdf:type owl:Class ;
+                         rdfs:label "Hedging Decision Framework"@en ;
+                         rdfs:comment "A structured approach to deciding whether and how to hedge."@en ;
+                         rdfs:subClassOf :DecisionFramework .
+:CostBenefitAnalysis rdf:type owl:Class ;
+                    rdfs:label "Cost-Benefit Analysis"@en ;
+                    rdfs:subClassOf :HedgingDecisionFramework ;
+                    rdfs:comment "Comparison of hedging costs with risk reduction benefits."@en .
+:hasDecisionFactor rdf:type owl:ObjectProperty ;
+                  rdfs:domain :HedgingDecisionFramework ;
+                  rdfs:range :DecisionFactor ;
+                  rdfs:label "has decision factor"@en .
+:DecisionFactor rdf:type owl:Class ;
+               rdfs:label "Decision Factor"@en ;
+               rdfs:comment "A consideration in the hedging decision."@en .
+
+:RiskAppetite rdf:type owl:Class ;
+             rdfs:label "Risk Appetite"@en ;
+             rdfs:comment "The amount and type of risk an organization is willing to pursue or retain to achieve its strategic objectives."@en ;
+             rdfs:subClassOf :GovernanceConcept .
+:RiskCapacity rdf:type owl:Class ;
+             rdfs:label "Risk Capacity"@en ;
+             rdfs:comment "The maximum amount of risk an organization can bear given its financial and operational resources."@en ;
+             rdfs:subClassOf :GovernanceConcept .
+:RiskTolerance rdf:type owl:Class ;
+              rdfs:label "Risk Tolerance"@en ;
+              rdfs:comment "The acceptable variation in outcomes relative to objectives."@en ;
+              rdfs:subClassOf :GovernanceConcept .
+
+:RiskAppetiteStatement rdf:type owl:Class ;
+                      rdfs:label "Risk Appetite Statement"@en ;
+                      rdfs:comment "A formal document articulating the organization's risk appetite."@en ;
+                      rdfs:subClassOf :PolicyDocument .
+:hasQuantitativeLimit rdf:type owl:ObjectProperty ;
+                     rdfs:domain :RiskAppetiteStatement ;
+                     rdfs:range :QuantitativeLimit ;
+                     rdfs:label "has quantitative limit"@en .
+:hasQualitativeBoundary rdf:type owl:ObjectProperty ;
+                       rdfs:domain :RiskAppetiteStatement ;
+                       rdfs:range :QualitativeBoundary ;
+                       rdfs:label "has qualitative boundary"@en .
+
+:QuantitativeLimit rdf:type owl:Class ;
+                  rdfs:label "Quantitative Limit"@en ;
+                  rdfs:comment "A numerical constraint on risk-taking."@en ;
+                  rdfs:subClassOf :RiskLimit .
+:ValueAtRiskLimit rdf:type owl:Class ;
+                 rdfs:label "Value at Risk Limit"@en ;
+                 rdfs:subClassOf :QuantitativeLimit ;
+                 rdfs:comment "Maximum VaR at specified confidence level and time horizon."@en .
+:EarningsAtRiskLimit rdf:type owl:Class ;
+                    rdfs:label "Earnings at Risk Limit"@en ;
+                    rdfs:subClassOf :QuantitativeLimit ;
+                    rdfs:comment "Maximum acceptable impact on earnings."@en .
+:ConcentrationLimit rdf:type owl:Class ;
+                   rdfs:label "Concentration Limit"@en ;
+                   rdfs:subClassOf :QuantitativeLimit ;
+                   rdfs:comment "Maximum exposure to a single counterparty, sector, or geography."@en .
+
+:QualitativeBoundary rdf:type owl:Class ;
+                    rdfs:label "Qualitative Boundary"@en ;
+                    rdfs:comment "A non-numerical constraint on risk-taking."@en ;
+                    rdfs:subClassOf :RiskLimit .
+:ProhibitedActivity rdf:type owl:Class ;
+                   rdfs:label "Prohibited Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Types of risks that are never undertaken."@en .
+:ControlledActivity rdf:type owl:Class ;
+                   rdfs:label "Controlled Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Risks allowed only with specific controls and approvals."@en .
+:EncouragedActivity rdf:type owl:Class ;
+                   rdfs:label "Encouraged Activity"@en ;
+                   rdfs:subClassOf :QualitativeBoundary ;
+                   rdfs:comment "Risks aligned with strategy and encouraged."@en .
+
+
+# =================================================================
+# FRM Ontology - Chapters 4 to 14
+# FRM本体知识记录 - 第4-14章
+# =================================================================
+
+@prefix : <http://purl.org/frm/ontology/2026#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+
+# Ontology Declaration
+<http://purl.org/frm/ontology/2026> a owl:Ontology ;
+owl:versionIRI <http://purl.org/frm/ontology/2026/v1.0> ;
+schema:name "FRM Risk Management Ontology (Chapters 4-14)"@en, "FRM风险管理本体（第4-14章）"@zh ;
+schema:description "Formal ontology of FRM Part I chapters 4-14"@en, "形式化FRM Part I第4-14章知识"@zh .
+
+# ===== Classes: Risk Types =====
+:RiskConcept a owl:Class ;
+rdfs:label "Risk Concept"@en, "风险概念"@zh ;
+rdfs:comment "Root class for all FRM concepts"@en, "所有FRM概念的根类"@zh .
+
+:RiskType a owl:Class ;
+rdfs:label "Risk Type"@en, "风险类型"@zh ;
+rdfs:comment "Categories of financial risk"@en, "金融风险分类"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:CreditRisk a owl:Class ;
+rdfs:label "Credit Risk"@en, "信用风险"@zh ;
+rdfs:comment "Risk from borrower/counterparty default"@en, "借款人或交易对手违约风险"@zh ;
+rdfs:subClassOf :RiskType .
+
+:MarketRisk a owl:Class ;
+rdfs:label "Market Risk"@en, "市场风险"@zh ;
+rdfs:comment "Risk from market price movements"@en, "市场价格变动风险"@zh ;
+rdfs:subClassOf :RiskType .
+
+:InterestRateRisk a owl:Class ;
+rdfs:label "Interest Rate Risk"@en, "利率风险"@zh ;
+rdfs:comment "Risk from yield curve shifts"@en, "收益率曲线变动风险"@zh ;
+rdfs:subClassOf :MarketRisk .
+
+:CurrencyRisk a owl:Class ;
+rdfs:label "Currency Risk"@en, "汇率风险"@zh ;
+rdfs:comment "Risk from FX rate movements"@en, "外汇汇率变动风险"@zh ;
+rdfs:subClassOf :MarketRisk .
+
+:LiquidityRisk a owl:Class ;
+rdfs:label "Liquidity Risk"@en, "流动性风险"@zh ;
+rdfs:comment "Risk from inability to obtain funds at reasonable cost"@en, "无法以合理成本获得资金的风险"@zh ;
+rdfs:subClassOf :RiskType .
+
+:OperationalRisk a owl:Class ;
+rdfs:label "Operational Risk"@en, "操作风险"@zh ;
+rdfs:comment "Risk from inadequate processes, people, systems, or external events"@en, "内部流程、人员、系统缺陷或外部事件风险"@zh ;
+rdfs:subClassOf :RiskType .
+
+:SystemicRisk a owl:Class ;
+rdfs:label "Systemic Risk"@en, "系统性风险"@zh ;
+rdfs:comment "Risk of entire financial system failure"@en, "整个金融体系崩溃风险"@zh ;
+rdfs:subClassOf :RiskType .
+
+# ===== Classes: Frameworks =====
+:Framework a owl:Class ;
+rdfs:label "Framework"@en, "框架体系"@zh ;
+rdfs:comment "Regulatory or methodological frameworks"@en, "监管或方法论框架"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:BaselI a owl:Class ;
+rdfs:label "Basel I"@en, "巴塞尔协议I"@zh ;
+rdfs:comment "1988 Basel framework focusing on credit risk"@en, "1988年巴塞尔协议，专注信用风险"@zh ;
+rdfs:subClassOf :Framework .
+
+:BaselII a owl:Class ;
+rdfs:label "Basel II"@en, "巴塞尔协议II"@zh ;
+rdfs:comment "2004 Basel framework with three pillars"@en, "2004年巴塞尔协议，三大支柱"@zh ;
+rdfs:subClassOf :Framework .
+
+:BaselIII a owl:Class ;
+rdfs:label "Basel III"@en, "巴塞尔协议III"@zh ;
+rdfs:comment "Post-2008 crisis Basel framework with capital and liquidity requirements"@en, "后2008危机巴塞尔协议，含资本和流动性要求"@zh ;
+rdfs:subClassOf :Framework .
+
+:COSO_Framework a owl:Class ;
+rdfs:label "COSO ERM Framework"@en, "COSO ERM框架"@zh ;
+rdfs:comment "Enterprise Risk Management framework with 5 elements and 21 principles"@en, "包含5个要素和21个原则的企业风险管理框架"@zh ;
+rdfs:subClassOf :Framework .
+
+:GovernanceAndCulture a owl:Class ;
+rdfs:label "Governance and Culture"@en, "治理与文化"@zh ;
+rdfs:comment "First element of COSO ERM framework"@en, "COSO ERM框架第一要素"@zh ;
+rdfs:subClassOf :COSO_Framework .
+
+:StrategyAndObjectiveSetting a owl:Class ;
+rdfs:label "Strategy and Objective Setting"@en, "战略和目标设定"@zh ;
+rdfs:comment "Second element of COSO ERM framework"@en, "COSO ERM框架第二要素"@zh ;
+rdfs:subClassOf :COSO_Framework .
+
+:Performance_Element a owl:Class ;
+rdfs:label "Performance"@en, "绩效"@zh ;
+rdfs:comment "Third element of COSO ERM framework"@en, "COSO ERM框架第三要素"@zh ;
+rdfs:subClassOf :COSO_Framework .
+
+:ReviewAndRevision a owl:Class ;
+rdfs:label "Review and Revision"@en, "审查和修订"@zh ;
+rdfs:comment "Fourth element of COSO ERM framework"@en, "COSO ERM框架第四要素"@zh ;
+rdfs:subClassOf :COSO_Framework .
+
+:InformationCommunicationAndReporting a owl:Class ;
+rdfs:label "Information, Communication, and Reporting"@en, "信息、沟通和报告"@zh ;
+rdfs:comment "Fifth element of COSO ERM framework"@en, "COSO ERM框架第五要素"@zh ;
+rdfs:subClassOf :COSO_Framework .
+
+# ===== Classes: Risk Management Concepts =====
+:RiskAppetite a owl:Class ;
+rdfs:label "Risk Appetite"@en, "风险偏好"@zh ;
+rdfs:comment "Amount of risk organization is willing to pursue"@en, "组织愿意承担的风险量"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:RiskCapacity a owl:Class ;
+rdfs:label "Risk Capacity"@en, "风险容量"@zh ;
+rdfs:comment "Maximum risk organization can bear financially"@en, "组织财务上能承受的最大风险"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:RiskTolerance a owl:Class ;
+rdfs:label "Risk Tolerance"@en, "风险容忍度"@zh ;
+rdfs:comment "Acceptable variation relative to objectives"@en, "相对于目标的允许波动范围"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:ERMFramewor a owl:Class ;
+rdfs:label "Enterprise Risk Management"@en, "企业风险管理"@zh ;
+rdfs:comment "Integrated approach to managing all risks across organization"@en, "组织层面全面风险管理方法"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:DiversificationEffect a owl:Class ;
+rdfs:label "Diversification Effect"@en, "分散效应"@zh ;
+rdfs:comment "Risk reduction from combining imperfectly correlated risks"@en, "不完全相关风险组合带来的风险降低"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+# ===== Classes: Financial Instruments =====
+:MBS a owl:Class ;
+rdfs:label "Mortgage-Backed Security"@en, "抵押贷款支持证券"@zh ;
+rdfs:comment "Securitization product based on mortgage pools"@en, "基于抵押贷款池的证券化产品"@zh ;
+rdfs:subClassOf :FinancialInstrument .
+
+:CDO a owl:Class ;
+rdfs:label "Collateralized Debt Obligation"@en, "担保债务凭证"@zh ;
+rdfs:comment "Securitization product based on debt assets including MBS"@en, "基于债务资产（包括MBS）的证券化产品"@zh ;
+rdfs:subClassOf :FinancialInstrument .
+
+:CDS a owl:Class ;
+rdfs:label "Credit Default Swap"@en, "信用违约互换"@zh ;
+rdfs:comment "Credit risk insurance contract"@en, "信用风险保险合约"@zh ;
+rdfs:subClassOf :FinancialInstrument .
+
+# ===== Classes: Financial Disasters =====
+:FinancialDisaster a owl:Class ;
+rdfs:label "Financial Disaster"@en, "金融灾难"@zh ;
+rdfs:comment "Historical financial failures and crises"@en, "历史性金融失败和危机"@zh ;
+rdfs:subClassOf :RiskConcept .
+
+:BaringsFailure a owl:Class ;
+rdfs:label "Barings Bank Collapse (1995)"@en, "巴林银行破产（1995）"@zh ;
+rdfs:comment "Bank failure due to unauthorized trading by Nick Leeson"@en, "因尼克·里森未经授权交易导致的银行倒闭"@zh ;
+rdfs:subClassOf :FinancialDisaster .
+
+:LTCMFailure a owl:Class ;
+rdfs:label "LTCM Collapse (1998)"@en, "LTCM崩溃（1998）"@zh ;
+rdfs:comment "Hedge fund failure due to excessive leverage and model risk"@en, "因过度杠杆和模型风险导致的对冲基金失败"@zh ;
+rdfs:subClassOf :FinancialDisaster .
+
+:LehmanFailure a owl:Class ;
+rdfs:label "Lehman Brothers Bankruptcy (2008)"@en, "雷曼兄弟破产（2008）"@zh ;
+rdfs:comment "Largest US bankruptcy triggered by subprime crisis"@en, "由次贷危机引发的美国历史上最大破产案"@zh ;
+rdfs:subClassOf :FinancialDisaster .
+
+:SVBFailure a owl:Class ;
+rdfs:label "Silicon Valley Bank Failure (2023)"@en, "硅谷银行倒闭（2023）"@zh ;
+rdfs:comment "Bank failure due to interest rate risk and deposit run"@en, "因利率风险和存款挤兑导致的银行倒闭"@zh ;
+rdfs:subClassOf :FinancialDisaster .
+
+# ===== Classes: Performance Metrics =====
+:SharpeRatio a owl:Class ;
+rdfs:label "Sharpe Ratio"@en, "夏普比率"@zh ;
+rdfs:comment "Risk-adjusted return measure: (Rp-Rf)/σp"@en, "风险调整收益指标：(Rp-Rf)/σp"@zh ;
+rdfs:subClassOf :MeasurementMetric .
+
+:TreynorRatio a owl:Class ;
+rdfs:label "Treynor Ratio"@en, "特雷诺比率"@zh ;
+rdfs:comment "Risk-adjusted return measure: (Rp-Rf)/βp"@en, "风险调整收益指标：(Rp-Rf)/βp"@zh ;
+rdfs:subClassOf :MeasurementMetric .
+
+:JensenAlpha a owl:Class ;
+rdfs:label "Jensen's Alpha"@en, "詹森阿尔法"@zh ;
+rdfs:comment "Alpha: Rp - [Rf + βp(Rm-Rf)]"@en, "阿尔法：Rp - [Rf + βp(Rm-Rf)]"@zh ;
+rdfs:subClassOf :MeasurementMetric .
+
+:InformationRatio a owl:Class ;
+rdfs:label "Information Ratio"@en, "信息比率"@zh ;
+rdfs:comment "Active return per unit of tracking error"@en, "单位追踪误差的主动收益"@zh ;
+rdfs:subClassOf :MeasurementMetric .
+
+# ===== Classes: Pricing Models =====
+:CAPM a owl:Class ;
+rdfs:label "CAPM"@en, "资本资产定价模型"@zh ;
+rdfs:comment "E[Ri] = Rf + βi × (E[Rm]-Rf)"@en, "E[Ri] = Rf + βi × (E[Rm]-Rf)"@zh ;
+rdfs:subClassOf :PricingModel .
+
+:APT a owl:Class ;
+rdfs:label "APT"@en, "套利定价理论"@zh ;
+rdfs:comment "Multi-factor asset pricing model"@en, "多因子资产定价模型"@zh ;
+rdfs:subClassOf :PricingModel .
+
+:MarkowitzModel a owl:Class ;
+rdfs:label "Markowitz Mean-Variance Model"@en, "马科维茨均值-方差模型"@zh ;
+rdfs:comment "Portfolio theory based on mean and variance"@en, "基于均值和方差的组合理论"@zh ;
+rdfs:subClassOf :PricingModel .
+
+# ===== Classes: Liquidity & Crisis Concepts =====
+:LiquiditySpiral a owl:Class ;
+rdfs:label "Liquidity Spiral"@en, "流动性螺旋"@zh ;
+rdfs:comment "Self-reinforcing cycle of liquidity shortage"@en, "流动性不足的自我强化循环"@zh ;
+rdfs:subClassOf :CrisisConcept .
+
+:ContagionDirect a owl:Class ;
+rdfs:label "Direct Contagion"@en, "直接传染"@zh ;
+rdfs:comment "Contagion through direct exposure to failed institutions"@en, "通过对失败机构的直接敞口传染"@zh ;
+rdfs:subClassOf :ContagionConcept .
+
+:ContagionIndirect a owl:Class ;
+rdfs:label "Indirect Contagion"@en, "间接传染"@zh ;
+rdfs:comment "Contagion through common exposures"@en, "通过共同敞口传染"@zh ;
+rdfs:subClassOf :ContagionConcept .
+
+:ContagionLiquidity a owl:Class ;
+rdfs:label "Liquidity Contagion"@en, "流动性传染"@zh ;
+rdfs:comment "Contagion through liquidity drying up"@en, "通过流动性枯竭传染"@zh ;
+rdfs:subClassOf :ContagionConcept .
+
+# ===== Classes: Capital Requirements =====
+:CET1Capital a owl:Class ;
+rdfs:label "CET1 Capital"@en, "普通股权益一级资本"@zh ;
+rdfs:comment "Highest quality capital: common shares + retained earnings"@en, "最高质量资本：普通股+留存收益"@zh ;
+rdfs:subClassOf :RegulatoryRequirement .
+
+:LiquidityCoverageRatio a owl:Class ;
+rdfs:label "LCR"@en, "流动性覆盖率"@zh ;
+rdfs:comment "HQLA / 30-day net cash outflows >= 100%"@en, "HQLA/30天净现金流出>=100%"@zh ;
+rdfs:subClassOf :RegulatoryRequirement .
+
+:NetStableFundingRatio a owl:Class ;
+rdfs:label "NSFR"@en, "净稳定资金比率"@zh ;
+rdfs:comment "Available stable funding / Required stable funding >= 100%"@en, "可用稳定资金/所需稳定资金>=100%"@zh ;
+rdfs:subClassOf :RegulatoryRequirement .
+
+:LeverageRatio a owl:Class ;
+rdfs:label "Leverage Ratio"@en, "杠杆率"@zh ;
+rdfs:comment "Tier 1 capital / Total exposure >= 3%"@en, "一级资本/总敞口>=3%"@zh ;
+rdfs:subClassOf :RegulatoryRequirement .
+
+# ===== Data Properties =====
+:hasValue a owl:DatatypeProperty ;
+rdfs:domain owl:Thing ;
+rdfs:range xsd:decimal ;
+rdfs:label "has value"@en, "具有数值"@zh .
+
+:hasMinimumRequirement a owl:DatatypeProperty ;
+rdfs:domain :RegulatoryRequirement ;
+rdfs:range xsd:decimal ;
+rdfs:label "has minimum requirement"@en, "最低要求"@zh .
+
+:hasChapter a owl:DatatypeProperty ;
+rdfs:domain owl:Thing ;
+rdfs:range xsd:integer ;
+rdfs:label "covers chapter"@en, "涵盖章节"@zh .
+
+
+
+# ===== Additional Data Properties (补充数据属性) =====
+
+# --- Risk Measurement ---
+:hasVaRValue a owl:DatatypeProperty ;
+  rdfs:domain :RiskMeasurementTool ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has VaR value"@en, "VaR值"@zh ;
+  rdfs:comment "Value at Risk numerical value"@en, "风险价值数值"@zh .
+
+:hasConfidenceLevel a owl:DatatypeProperty ;
+  rdfs:domain :RiskMeasurementTool ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has confidence level"@en, "置信水平"@zh ;
+  rdfs:comment "Confidence level for risk measurement (e.g., 0.99 for 99%)"@en, "风险测量的置信水平（如0.99表示99%）"@zh .
+
+:hasTimeHorizonDays a owl:DatatypeProperty ;
+  rdfs:domain :RiskMeasurementTool ;
+  rdfs:range xsd:integer ;
+  rdfs:label "has time horizon in days"@en, "持有期限（天）"@zh ;
+  rdfs:comment "Time horizon for risk measurement in days"@en, "风险衡量的持有期限（天）"@zh .
+
+:hasVolatility a owl:DatatypeProperty ;
+  rdfs:domain :RiskType ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has volatility"@en, "波动率"@zh ;
+  rdfs:comment "Standard deviation of returns"@en, "收益率的标准差"@zh .
+
+:hasCorrelation a owl:DatatypeProperty ;
+  rdfs:domain :RiskType ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has correlation"@en, "相关系数"@zh ;
+  rdfs:comment "Correlation coefficient between risk factors"@en, "风险因素之间的相关系数"@zh .
+
+:hasExpectedReturn a owl:DatatypeProperty ;
+  rdfs:domain :RiskType ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has expected return"@en, "期望收益率"@zh ;
+  rdfs:comment "Expected return rate"@en, "预期收益率"@zh .
+
+:hasStandardDeviation a owl:DatatypeProperty ;
+  rdfs:domain :Portfolio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has standard deviation"@en, "标准差"@zh ;
+  rdfs:comment "Portfolio standard deviation"@en, "投资组合标准差"@zh .
+
+:hasBeta a owl:DatatypeProperty ;
+  rdfs:domain :PricingModel ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has beta"@en, "Beta系数"@zh ;
+  rdfs:comment "Systematic risk beta coefficient"@en, "系统性风险Beta系数"@zh .
+
+:hasAlpha a owl:DatatypeProperty ;
+  rdfs:domain :PricingModel ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has alpha"@en, "Alpha值"@zh ;
+  rdfs:comment "Jensen's Alpha or excess return"@en, "詹森阿尔法或超额收益"@zh .
+
+:hasSharpeRatio a owl:DatatypeProperty ;
+  rdfs:domain :MeasurementMetric ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has Sharpe ratio"@en, "夏普比率值"@zh ;
+  rdfs:comment "Sharpe ratio numerical value"@en, "夏普比率数值"@zh .
+
+:hasTreynorRatio a owl:DatatypeProperty ;
+  rdfs:domain :MeasurementMetric ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has Treynor ratio"@en, "特雷诺比率值"@zh ;
+  rdfs:comment "Treynor ratio numerical value"@en, "特雷诺比率数值"@zh .
+
+:hasInformationRatio a owl:DatatypeProperty ;
+  rdfs:domain :MeasurementMetric ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has information ratio"@en, "信息比率值"@zh ;
+  rdfs:comment "Information ratio numerical value"@en, "信息比率数值"@zh .
+
+:hasTrackingError a owl:DatatypeProperty ;
+  rdfs:domain :MeasurementMetric ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has tracking error"@en, "追踪误差"@zh ;
+  rdfs:comment "Active risk / tracking error"@en, "主动风险/追踪误差"@zh .
+
+:hasDrawdown a owl:DatatypeProperty ;
+  rdfs:domain :Portfolio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has maximum drawdown"@en, "最大回撤"@zh ;
+  rdfs:comment "Maximum drawdown from peak"@en, "从峰值的最大回撤"@zh .
+
+:hasDefaultProbability a owl:DatatypeProperty ;
+  rdfs:domain :CreditRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has default probability"@en, "违约概率"@zh ;
+  rdfs:comment "Probability of default (PD)"@en, "违约概率（PD）"@zh .
+
+:hasLossGivenDefault a owl:DatatypeProperty ;
+  rdfs:domain :CreditRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has loss given default"@en, "违约损失率"@zh ;
+  rdfs:comment "Loss given default (LGD)"@en, "违约损失率（LGD）"@zh .
+
+:hasExposureAtDefault a owl:DatatypeProperty ;
+  rdfs:domain :CreditRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has exposure at default"@en, "违约风险敞口"@zh ;
+  rdfs:comment "Exposure at default (EAD)"@en, "违约风险敞口（EAD）"@zh .
+
+# --- Capital & Regulatory ---
+:hasCET1Ratio a owl:DatatypeProperty ;
+  rdfs:domain :CET1Capital ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has CET1 ratio"@en, "CET1资本充足率"@zh ;
+  rdfs:comment "Common Equity Tier 1 capital ratio"@en, "普通股权益一级资本充足率"@zh .
+
+:hasTotalCapitalRatio a owl:DatatypeProperty ;
+  rdfs:domain :BaselIII ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has total capital ratio"@en, "总资本充足率"@zh ;
+  rdfs:comment "Total capital adequacy ratio"@en, "总资本充足率"@zh .
+
+:hasLeverageRatio a owl:DatatypeProperty ;
+  rdfs:domain :LeverageRatio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has leverage ratio value"@en, "杠杆率值"@zh ;
+  rdfs:comment "Leverage ratio percentage"@en, "杠杆率百分比"@zh .
+
+:hasLCRValue a owl:DatatypeProperty ;
+  rdfs:domain :LiquidityCoverageRatio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has LCR value"@en, "LCR值"@zh ;
+  rdfs:comment "Liquidity Coverage Ratio percentage"@en, "流动性覆盖率百分比"@zh .
+
+:hasNSFRValue a owl:DatatypeProperty ;
+  rdfs:domain :NetStableFundingRatio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has NSFR value"@en, "NSFR值"@zh ;
+  rdfs:comment "Net Stable Funding Ratio percentage"@en, "净稳定资金比率百分比"@zh .
+
+:hasRiskWeightedAssets a owl:DatatypeProperty ;
+  rdfs:domain :BaselIII ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has risk-weighted assets"@en, "风险加权资产"@zh ;
+  rdfs:comment "Total risk-weighted assets"@en, "总风险加权资产"@zh .
+
+# --- Portfolio ---
+:hasWeight a owl:DatatypeProperty ;
+  rdfs:domain :Asset ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has weight"@en, "权重"@zh ;
+  rdfs:comment "Portfolio weight of an asset"@en, "资产在组合中的权重"@zh .
+
+:hasMarketValue a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has market value"@en, "市值"@zh ;
+  rdfs:comment "Market value of a financial instrument"@en, "金融工具的市值"@zh .
+
+:hasDuration a owl:DatatypeProperty ;
+  rdfs:domain :InterestRateRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has duration"@en, "久期"@zh ;
+  rdfs:comment "Macaulay or modified duration"@en, "麦考利久期或修正久期"@zh .
+
+:hasConvexity a owl:DatatypeProperty ;
+  rdfs:domain :InterestRateRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has convexity"@en, "凸性"@zh ;
+  rdfs:comment "Bond convexity measure"@en, "债券凸性度量"@zh .
+
+:hasOpVaR a owl:DatatypeProperty ;
+  rdfs:domain :OperationalRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has OpVaR"@en, "操作风险VaR"@zh ;
+  rdfs:comment "Operational Value at Risk"@en, "操作风险价值"@zh .
+
+:hasCapitalCharge a owl:DatatypeProperty ;
+  rdfs:domain :OperationalRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has capital charge"@en, "资本要求"@zh ;
+  rdfs:comment "Basel III operational risk capital charge"@en, "巴塞尔III操作风险资本要求"@zh .
+
+:hasFactorLoading a owl:DatatypeProperty ;
+  rdfs:domain :APT ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has factor loading"@en, "因子载荷"@zh ;
+  rdfs:comment "Factor loading in APT model"@en, "APT模型中的因子载荷"@zh .
+
+:hasFactorRiskPremium a owl:DatatypeProperty ;
+  rdfs:domain :APT ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has factor risk premium"@en, "因子风险溢价"@zh ;
+  rdfs:comment "Risk premium for a factor in APT"@en, "APT中某因子的风险溢价"@zh .
+
+# ===== Object Properties =====
+:comparedTo a owl:ObjectProperty ;
+rdfs:domain :EnterpriseRiskManagement ;
+rdfs:range :TraditionalRiskManagement ;
+rdfs:label "compared to"@en, "与...对比"@zh .
+
+:hasElement a owl:ObjectProperty ;
+rdfs:domain :COSO_Framework ;
+rdfs:range :COSO_Framework ;
+rdfs:label "has element"@en, "包含要素"@zh .
+
+:correlatesWith a owl:ObjectProperty ;
+rdfs:domain :RiskType ;
+rdfs:range :RiskType ;
+rdfs:label "correlates with"@en, "与...相关"@zh .
+
+:causesContagionTo a owl:ObjectProperty ;
+rdfs:domain :FinancialDisaster ;
+rdfs:range :CrisisConcept ;
+rdfs:label "causes contagion to"@en, "导致传染"@zh .
+
+# ===== Additional Data Properties Part 2 (补充数据属性Part 2) =====
+
+# --- Risk Governance & Culture (第3章) ---
+:hasRiskCultureScore a owl:DatatypeProperty ;
+  rdfs:domain :GovernanceAndCulture ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has risk culture score"@en, "风险文化评分"@zh ;
+  rdfs:comment "Score measuring organizational risk culture"@en, "衡量组织风险文化的评分"@zh .
+
+:hasToneAtTop a owl:DatatypeProperty ;
+  rdfs:domain :GovernanceAndCulture ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has tone at top score"@en, "高层基调评分"@zh ;
+  rdfs:comment "Score for tone at top assessment"@en, "高层基调评估评分"@zh .
+
+:hasBoardIndependence a owl:DatatypeProperty ;
+  rdfs:domain :GovernanceAndCulture ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has board independence"@en, "董事会独立性"@zh ;
+  rdfs:comment "Percentage of independent board members"@en, "独立董事比例"@zh .
+
+# --- Risk Appetite & Tolerance (第3章) ---
+:hasRiskAppetiteLevel a owl:DatatypeProperty ;
+  rdfs:domain :RiskAppetite ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has risk appetite level"@en, "风险偏好水平"@zh ;
+  rdfs:comment "Numerical level of risk appetite"@en, "风险偏好的数值水平"@zh .
+
+:hasRiskToleranceBand a owl:DatatypeProperty ;
+  rdfs:domain :RiskTolerance ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has risk tolerance band"@en, "风险容忍度区间"@zh ;
+  rdfs:comment "Acceptable deviation band percentage"@en, "可接受波动区间百分比"@zh .
+
+:hasRiskCapacityLimit a owl:DatatypeProperty ;
+  rdfs:domain :RiskCapacity ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has risk capacity limit"@en, "风险容量上限"@zh ;
+  rdfs:comment "Maximum risk capacity in monetary terms"@en, "货币形式的风险容量上限"@zh .
+
+# --- Financial Instruments (第8章) ---
+:hasMaturity a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has maturity"@en, "到期期限"@zh ;
+  rdfs:comment "Time to maturity in years"@en, "距到期年数"@zh .
+
+:hasCouponRate a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has coupon rate"@en, "票息率"@zh ;
+  rdfs:comment "Annual coupon rate"@en, "年票息率"@zh .
+
+:hasFaceValue a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has face value"@en, "面值"@zh ;
+  rdfs:comment "Face value or par value"@en, "面值或票面价值"@zh .
+
+:hasNotionalAmount a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has notional amount"@en, "名义本金"@zh ;
+  rdfs:comment "Notional amount for derivatives"@en, "衍生品名义本金"@zh .
+
+:hasStrikePrice a owl:DatatypeProperty ;
+  rdfs:domain :Option ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has strike price"@en, "行权价"@zh ;
+  rdfs:comment "Strike price for options"@en, "期权行权价格"@zh .
+
+:hasUnderlyingAsset a owl:DatatypeProperty ;
+  rdfs:domain :FinancialInstrument ;
+  rdfs:range xsd:string ;
+  rdfs:label "has underlying asset"@en, "标的资产"@zh ;
+  rdfs:comment "Type of underlying asset"@en, "标的资产类型"@zh .
+
+# --- Financial Disasters (第6章) ---
+:hasLossAmount a owl:DatatypeProperty ;
+  rdfs:domain :FinancialDisaster ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has loss amount"@en, "损失金额"@zh ;
+  rdfs:comment "Total loss amount in currency"@en, "总损失金额（货币）"@zh .
+
+:hasDurationDays a owl:DatatypeProperty ;
+  rdfs:domain :FinancialDisaster ;
+  rdfs:range xsd:integer ;
+  rdfs:label "has disaster duration"@en, "灾难持续时间"@zh ;
+  rdfs:comment "Duration of crisis in days"@en, "危机持续天数"@zh .
+
+:hasBankFailureYear a owl:DatatypeProperty ;
+  rdfs:domain :FinancialDisaster ;
+  rdfs:range xsd:integer ;
+  rdfs:label "has failure year"@en, "失败年份"@zh ;
+  rdfs:comment "Year of bank failure or crisis"@en, "银行倒闭或危机年份"@zh .
+
+# --- Crisis & Contagion (第7章) ---
+:hasCorrelationIncrease a owl:DatatypeProperty ;
+  rdfs:domain :ContagionConcept ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has correlation increase"@en, "相关性增加"@zh ;
+  rdfs:comment "Increase in correlation during crisis"@en, "危机期间相关性增加幅度"@zh .
+
+:hasLiquidityGap a owl:DatatypeProperty ;
+  rdfs:domain :LiquiditySpiral ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has liquidity gap"@en, "流动性缺口"@zh ;
+  rdfs:comment "Liquidity shortfall amount"@en, "流动性短缺金额"@zh .
+
+:hasFireSaleDiscount a owl:DatatypeProperty ;
+  rdfs:domain :CrisisConcept ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has fire sale discount"@en, "火线出售折扣"@zh ;
+  rdfs:comment "Discount applied during fire sale"@en, "火线出售时的折扣率"@zh .
+
+# --- Hedging Strategies (第1章补充) ---
+:hasHedgeRatio a owl:DatatypeProperty ;
+  rdfs:domain :HedgeInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has hedge ratio"@en, "对冲比率"@zh ;
+  rdfs:comment "Optimal hedge ratio"@en, "最佳对冲比率"@zh .
+
+:hasBasis a owl:DatatypeProperty ;
+  rdfs:domain :HedgeInstrument ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has basis"@en, "基差"@zh ;
+  rdfs:comment "Basis = Spot price - Futures price"@en, "基差=现货价格-期货价格"@zh .
+
+:hasCostOfHedge a owl:DatatypeProperty ;
+  rdfs:domain :HedgingCost ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has hedging cost value"@en, "对冲成本值"@zh ;
+  rdfs:comment "Total cost of hedging strategy"@en, "对冲策略的总成本"@zh .
+
+:hasEffectivenessRatio a owl:DatatypeProperty ;
+  rdfs:domain :HedgingAdvantage ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has effectiveness ratio"@en, "有效性比率"@zh ;
+  rdfs:comment "Percentage of risk offset by hedge"@en, "对冲抵消风险的百分比"@zh .
+
+# --- Moody's Rating (补充) ---
+:hasCreditRating a owl:DatatypeProperty ;
+  rdfs:domain :CreditRisk ;
+  rdfs:range xsd:string ;
+  rdfs:label "has credit rating"@en, "信用评级"@zh ;
+  rdfs:comment "Credit rating from rating agencies"@en, "评级机构的信用评级"@zh .
+
+:hasSpreadOverBenchmark a owl:DatatypeProperty ;
+  rdfs:domain :CreditRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has spread over benchmark"@en, "基准利差"@zh ;
+  rdfs:comment "Credit spread over benchmark rate"@en, "相对基准的信用利差"@zh .
+
+# --- Liquidity Metrics (第5章补充) ---
+:hasBidAskSpread a owl:DatatypeProperty ;
+  rdfs:domain :LiquidityRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has bid-ask spread"@en, "买卖价差"@zh ;
+  rdfs:comment "Bid-ask spread percentage"@en, "买卖价差百分比"@zh .
+
+:hasMarketDepth a owl:DatatypeProperty ;
+  rdfs:domain :LiquidityRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has market depth"@en, "市场深度"@zh ;
+  rdfs:comment "Volume available at best bid/ask"@en, "最佳买卖价位的可用量"@zh .
+
+:hasTimeToLiquidate a owl:DatatypeProperty ;
+  rdfs:domain :LiquidityRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has time to liquidate"@en, "变现时间"@zh ;
+  rdfs:comment "Time needed to liquidate position"@en, "变现所需时间"@zh .
+
+:hasHaircut a owl:DatatypeProperty ;
+  rdfs:domain :LiquidityCoverageRatio ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has haircut"@en, "折价率"@zh ;
+  rdfs:comment "Haircut applied to collateral"@en, "抵押品折价率"@zh .
+
+# --- Stress Testing (第5章补充) ---
+:hasStressScenarioSeverity a owl:DatatypeProperty ;
+  rdfs:domain :StressTesting ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has scenario severity"@en, "情景严重程度"@zh ;
+  rdfs:comment "Severity level of stress scenario"@en, "压力情景严重程度级别"@zh .
+
+:hasCapitalDeviation a owl:DatatypeProperty ;
+  rdfs:domain :StressTesting ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has capital deviation"@en, "资本偏离"@zh ;
+  rdfs:comment "Deviation from minimum capital under stress"@en, "压力情景下资本偏离最小要求值"@zh .
+
+# --- Operational Risk Metrics ---
+:hasLossFrequency a owl:DatatypeProperty ;
+  rdfs:domain :OperationalRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has loss frequency"@en, "损失频率"@zh ;
+  rdfs:comment "Frequency of operational loss events"@en, "操作风险损失事件频率"@zh .
+
+:hasSeverityLevel a owl:DatatypeProperty ;
+  rdfs:domain :OperationalRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has severity level"@en, "严重程度"@zh ;
+  rdfs:comment "Average severity of loss events"@en, "损失事件平均严重程度"@zh .
+
+# --- Model Risk ---
+:hasModelUncertainty a owl:DatatypeProperty ;
+  rdfs:domain :ModelRisk ;
+  rdfs:range xsd:decimal ;
+  rdfs:label "has model uncertainty"@en, "模型不确定性"@zh ;
+  rdfs:comment "Measure of model estimation uncertainty"@en, "模型估计不确定性度量"@zh .
+
+:hasBacktestingBreaches a owl:DatatypeProperty ;
+  rdfs:domain :ValueAtRisk ;
+  rdfs:range xsd:integer ;
+  rdfs:label "has backtesting breaches"@en, "回测突破次数"@zh ;
+  rdfs:comment "Number of exceptions in VaR backtesting"@en, "VaR回测中的例外次数"@zh .
